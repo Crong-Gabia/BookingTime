@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MeetingRequest {
+  id                String           @id @default(cuid())
+  title             String
+  organizerId       String
+  status            MeetingStatus    @default(DRAFT)
+  startDate         DateTime
+  endDate           DateTime
+  durationMinutes   Int
+  location          String?
+  version           Int              @default(1)
+  closedAt          DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+
+  participants      Participant[]
+  confirmedMeeting  ConfirmedMeeting?
+  timeSlots         TimeSlot[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Participant {
+  id                String          @id @default(cuid())
+  requestId         String
+  userId            String
+  name              String
+  responded         Boolean         @default(false)
+  remindedAt        DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  request           MeetingRequest  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  timeSlots         TimeSlot[]
+
+  @@unique([requestId, userId])
+  @@index([requestId])
+}
+
+model TimeSlot {
+  id                String          @id @default(cuid())
+  requestId         String
+  participantId     String?
+  slotDate          DateTime
+  status            SlotStatus      @default(AVAILABLE)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  request           MeetingRequest  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  participant       Participant?    @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([participantId, slotDate])
+}
+
+model ConfirmedMeeting {
+  id                String          @id @default(cuid())
+  requestId         String          @unique
+  selectedTimeSlot  DateTime
+  location          String?
+  confirmedAt       DateTime        @default(now())
+
+  request           MeetingRequest  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id                String          @id @default(cuid())
+  userId            String
+  requestId         String
+  type              String
+  sentAt            DateTime        @default(now())
+
+  @@index([userId])
+  @@index([requestId])
+}
+
+enum MeetingStatus {
+  DRAFT
+  OPEN
+  CONFIRMED
+  CANCELED
+}
+
+enum SlotStatus {
+  AVAILABLE
+  UNAVAILABLE
+  BLOCKED
+}
