@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AppBar, Toolbar, IconButton, Typography, Box, Button, TextField, Container } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface ParticipantInput {
   email: string;
@@ -79,194 +81,142 @@ export default function CreatePage() {
   };
 
   return (
-    <div style={{ padding: '1rem', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ marginBottom: '1.5rem' }}>새 회의 일정 만들기</h1>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <AppBar position="static" color="default" elevation={0}>
+        <Toolbar>
+          <IconButton onClick={() => navigate('/')} color="inherit">
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+            새 회의 일정 만들기
+          </Typography>
+        </Toolbar>
+      </AppBar>
 
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-          제목 *
-        </label>
-        <input
-          type="text"
+      <Container maxWidth="md" sx={{ py: 4, flex: 1 }}>
+        <TextField
+          fullWidth
+          label="제목 *"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="예: 팀 주간회의"
-          style={{
-            width: '100%',
-            padding: '0.75rem',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            fontSize: '1rem',
-          }}
+          sx={{ mb: 3 }}
+          disabled={isSubmitting}
         />
-      </div>
 
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-          설명
-        </label>
-        <textarea
+        <TextField
+          fullWidth
+          label="설명"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="회의에 대한 간단한 설명"
+          multiline
           rows={3}
-          style={{
-            width: '100%',
-            padding: '0.75rem',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            fontSize: '1rem',
-            fontFamily: 'inherit',
-          }}
+          sx={{ mb: 3 }}
+          disabled={isSubmitting}
         />
-      </div>
 
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+        <Typography variant="subtitle1" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>
           참석자 *
-        </label>
-        {participants.map((participant, index) => (
-          <div key={index} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-            <input
-              type="email"
-              value={participant.email}
-              onChange={(e) => handleParticipantChange(index, 'email', e.target.value)}
-              placeholder="이메일"
-              style={{
-                flex: 1,
-                padding: '0.5rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-              }}
-            />
-            <input
-              type="text"
-              value={participant.name}
-              onChange={(e) => handleParticipantChange(index, 'name', e.target.value)}
-              placeholder="이름"
-              style={{
-                flex: 1,
-                padding: '0.5rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-              }}
-            />
-            {participants.length > 1 && (
-              <button
-                onClick={() => handleRemoveParticipant(index)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#f44336',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                삭제
-              </button>
-            )}
-          </div>
-        ))}
-        <button
-          onClick={handleAddParticipant}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#2196f3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
-          + 참석자 추가
-        </button>
-      </div>
+        </Typography>
+        <Box sx={{ mb: 3 }}>
+          {participants.map((participant, index) => (
+            <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+              <TextField
+                type="email"
+                label="이메일"
+                value={participant.email}
+                onChange={(e) => handleParticipantChange(index, 'email', e.target.value)}
+                sx={{ flex: 1 }}
+                disabled={isSubmitting}
+              />
+              <TextField
+                type="text"
+                label="이름"
+                value={participant.name}
+                onChange={(e) => handleParticipantChange(index, 'name', e.target.value)}
+                sx={{ flex: 1 }}
+                disabled={isSubmitting}
+              />
+              {participants.length > 1 && (
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={() => handleRemoveParticipant(index)}
+                  disabled={isSubmitting}
+                >
+                  삭제
+                </Button>
+              )}
+            </Box>
+          ))}
+          <Button
+            variant="outlined"
+            onClick={handleAddParticipant}
+            startIcon={<span>+</span>}
+            disabled={isSubmitting}
+          >
+            참석자 추가
+          </Button>
+        </Box>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            시작일 *
-          </label>
-          <input
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
+          <TextField
             type="date"
+            label="시작일 *"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-            }}
+            InputLabelProps={{ shrink: true }}
+            disabled={isSubmitting}
           />
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            종료일 *
-          </label>
-          <input
+          <TextField
             type="date"
+            label="종료일 *"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-            }}
+            InputLabelProps={{ shrink: true }}
+            disabled={isSubmitting}
           />
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            소요시간 *
-          </label>
-          <select
+          <TextField
+            select
+            label="소요시간 *"
             value={durationMinutes}
             onChange={(e) => setDurationMinutes(Number(e.target.value))}
-            style={{
-              width: '100%',
-              padding: '0.5rem',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-            }}
+            disabled={isSubmitting}
           >
             <option value={30}>30분</option>
             <option value={60}>1시간</option>
             <option value={90}>1시간 30분</option>
             <option value={120}>2시간</option>
             <option value={180}>3시간</option>
-          </select>
-        </div>
-      </div>
+          </TextField>
+        </Box>
 
-      <button
-        onClick={handleSubmit}
-        disabled={isSubmitting}
-        style={{
-          width: '100%',
-          padding: '1rem',
-          backgroundColor: '#4caf50',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          fontSize: '1.1rem',
-          cursor: isSubmitting ? 'not-allowed' : 'pointer',
-          opacity: isSubmitting ? 0.7 : 1,
-          fontWeight: 'bold',
-        }}
-      >
-        {isSubmitting ? '생성 중...' : '회의 요청 생성'}
-      </button>
+        <Button
+          variant="contained"
+          fullWidth
+          size="large"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          sx={{ mb: 2 }}
+        >
+          {isSubmitting ? '생성 중...' : '회의 요청 생성'}
+        </Button>
 
-      <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
-        <h3 style={{ marginTop: 0, marginBottom: '0.5rem', fontSize: '1rem' }}>💡 참고</h3>
-        <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
-          <li>회의 시간은 09:00-18:00 사이 30분 단위로만 가능합니다.</li>
-          <li>점심시간(12:00-13:00)은 자동으로 제외됩니다.</li>
-          <li>생성 후 대시보드에서 참석자들에게 응답 링크를 공유하세요.</li>
-          <li>주말은 제외됩니다.</li>
-        </ul>
-      </div>
-    </div>
+        <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1 }}>
+          <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+            💡 참고
+          </Typography>
+          <Typography variant="body2" component="div">
+            <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+              <li>회의 시간은 09:00-18:00 사이 30분 단위로만 가능합니다.</li>
+              <li>점심시간(12:00-13:00)은 자동으로 제외됩니다.</li>
+              <li>생성 후 대시보드에서 참석자들에게 응답 링크를 공유하세요.</li>
+              <li>주말은 제외됩니다.</li>
+            </ul>
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
   );
 }
