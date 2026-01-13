@@ -1,5 +1,7 @@
+const API_BASE_URL = 'http://localhost:3000';
+
 export async function getAllMeetings() {
-  const response = await fetch('/api/meetings');
+  const response = await fetch(`${API_BASE_URL}/api/meetings`);
   if (!response.ok) {
     throw new Error('Failed to fetch meetings');
   }
@@ -7,7 +9,7 @@ export async function getAllMeetings() {
 }
 
 export async function fetchDashboard(requestId: string) {
-  const response = await fetch(`/api/meetings/${requestId}/dashboard`);
+  const response = await fetch(`${API_BASE_URL}/api/meetings/${requestId}/dashboard`);
   if (!response.ok) {
     throw new Error('Failed to fetch dashboard');
   }
@@ -23,7 +25,7 @@ export async function createMeeting(payload: {
   participantIds: string[];
   organizerId: string;
 }) {
-  const response = await fetch('/api/meetings', {
+  const response = await fetch(`${API_BASE_URL}/api/meetings`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -41,7 +43,7 @@ export async function submitResponse(payload: {
   availableSlots: string[];
   unavailableSlots: string[];
 }) {
-  const response = await fetch(`/api/meetings/${payload.requestId}/respond`, {
+  const response = await fetch(`${API_BASE_URL}/api/meetings/${payload.requestId}/respond`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -53,7 +55,7 @@ export async function submitResponse(payload: {
 }
 
 export async function sendReminder(requestId: string, userId: string) {
-  const response = await fetch(`/api/meetings/${requestId}/remind/${userId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/meetings/${requestId}/remind/${userId}`, {
     method: 'POST',
   });
   if (!response.ok) {
@@ -67,7 +69,7 @@ export async function confirmMeeting(payload: {
   selectedTimeSlot: string;
   location: string;
 }) {
-  const response = await fetch(`/api/meetings/${payload.requestId}/confirm`, {
+  const response = await fetch(`${API_BASE_URL}/api/meetings/${payload.requestId}/confirm`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

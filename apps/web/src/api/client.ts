@@ -11,6 +11,8 @@ async function parseJson<T>(response: Response): Promise<T | null> {
   }
 }
 
+const API_BASE_URL = 'http://localhost:3000';
+
 export async function requestJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const response = await fetch(input, init);
   const payload = await parseJson<T>(response);
@@ -39,6 +41,6 @@ export interface Meeting {
 }
 
 export async function getAllMeetings(): Promise<{ meetings: Meeting[] }> {
-  return requestJson('/api/meetings');
+  return requestJson(`${API_BASE_URL}/api/meetings`);
 }
 
