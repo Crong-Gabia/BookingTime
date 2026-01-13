@@ -230,5 +230,38 @@ ERROR self signed certificate in certificate chain fatal
    - 인증서 경로는 IT팀에 문의하거나 시스템 설정에서 확인
 
 3. **대안**
-   - IT팀에 OpenCode가 외부 인증 서버와 통신할 수 있도록 프록시/방화벽 설정 요청
-   - 로그 위치: `~/.local/share/opencode/log/`
+    - IT팀에 OpenCode가 외부 인증 서버와 통신할 수 있도록 프록시/방화벽 설정 요청
+    - 로그 위치: `~/.local/share/opencode/log/`
+
+## 에이전트 작업 규칙
+
+### 자율 판단 원칙
+
+- **명확한 요청**: 사용자의 의도가 명확할 때는 추가 질문 없이 즉시 실행
+- **모호한 요청**: 의도가 불분명하거나 여러 해석이 가능할 때만 질문
+- **최선의 선택**: 여러 방법 중 가장 합리적이고 프로젝트에 맞는 방식 선택 후 진행
+
+### 문서 정리 규칙
+
+- **구조화**: 파일이 루트에 너무 많으면 카테고리별로 정리 (docs/setup, docs/guides, docs/reference)
+- **일관성**: 파일명은 kebab-case, 구조는 기존 패턴 준수
+- **자동 업데이트**: README.md에는 새로운 문서 링크 즉시 추가
+
+### 기획서 및 작업 기록 규칙
+
+- **위치**: `work-history/product-spec/` 폴더 사용
+- **버전 관리**:
+  - `plan.md`: 최신 기획서만 유지
+  - `index.md`: 변경 이력 누적
+  - `risks.md`: 논리적 모순/리스크 추론 기록
+  - `links.md`: Confluence/Figma 링크 관리
+  - `decisions.md`: 의사결정 기록
+- **에이전트 작업 전**: 항상 `plan.md` 최신 내용 확인
+- **구현 시 모순 발견**: 즉시 `risks.md`에 추론 및 근거 기록
+
+### 지침 업데이트 규칙
+
+- **지침 변경**: 직접 `develop` 브랜치에 push
+- **작업 완료 후**: 별도 기능 브랜치에서 develop로 PR 생성
+- **PR 없이 develop에 직접 push 가능한 항목**: 문서/지침 변경만
+
