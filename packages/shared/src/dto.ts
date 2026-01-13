@@ -50,7 +50,6 @@ export interface DashboardDto {
   participants: Array<{
     userId: string;
     name: string;
-    department: string;
     responded: boolean;
   }>;
   commonAvailableSlots: Array<{

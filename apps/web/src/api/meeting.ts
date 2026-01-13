@@ -90,7 +90,6 @@ export type DashboardData = {
   participants: Array<{
     userId: string;
     name: string;
-    department: string;
     responded: boolean;
   }>;
   commonAvailableSlots: Array<{

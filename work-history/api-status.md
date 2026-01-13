@@ -5,13 +5,15 @@
 
 ---
 
-## 최신 업데이트 (2026-01-13 v2)
+## 최신 업데이트 (2026-01-13 v3)
 
 - ✅ ERROR_CODES 중복 제거 완료
 - ✅ ConfirmMeetingDto 통일 완료 (selectedTimeSlot, location)
-- ✅ 회의 확정 API 경로 수정 완료 (`/api/meetings/:id/confirm`)
+- ✅ 회의 확정 경로 수정 완료 (`/api/meetings/:id/confirm`)
 - ✅ getAllMeetings API 래퍼 추가 완료
-- 🟝 중간 우선순위 이슈: DashboardDto 및 CreateMeetingRequestDto DTO 확인 필요
+- ✅ DashboardDto department 필드 제거 완료 (DTO에서 제거, 백엔드에서 department 참조 제거)
+- ✅ ResponsePage 동적 날짜 처리 확인 (하드코딩 없음, dashboard 데이터에서 동적으로 받음)
+- 🟝 중간 우선순위 이슈: CreateMeetingRequestDto participantIds 중복 제거 필요
 
 ---
 
@@ -41,7 +43,7 @@
 | **백엔드 구현** | ✅ 완료 |
 | **프론트엔드 래퍼** | ✅ 완료 |
 | **사용 페이지** | CreatePage |
-| **상태** | 🟡 DTO 불일치 확인 필요 |
+| **상태** | 🟡 DTO 불일치 확인 필요 (participantIds 중복) |
 
 #### DTO 불일치 사항
 
@@ -52,11 +54,11 @@
   description?: string;
   organizerId: string;
   participantIds: string[];
-  requiredParticipantIds: string[];  // ⚠️ 프론트엔드 미사용
+  requiredParticipantIds: string[];  // ⚠️ 프론트엔드 미사용 (삭제 필요)
   startDate: string;
   endDate: string;
   durationMinutes: number;
-  location?: string;  // ⚠️ 프론트엔드 미전송
+  location?: string;
 }
 ```
 
@@ -66,12 +68,11 @@
   title: string;
   description: string;
   organizerId: 'organizer-1';
-  participantIds: string[];  // participantIds = requiredParticipantIds로 병합
+  participantIds: string[];  // ⚠️ requiredParticipantIds도 같은 값으로 중복 전송 중 (제거 필요)
   requiredParticipantIds: string[];
   startDate: string;
   endDate: string;
   durationMinutes: number;
-  // ⚠️ location 미전송
 }
 ```
 
@@ -83,9 +84,9 @@
 | **백엔드 구현** | ✅ 완료 |
 | **프론트엔드 래퍼** | ✅ 완료 |
 | **사용 페이지** | DashboardPage |
-| **상태** | 🟡 DTO 불일치 확인 필요 |
+| **상태** | ✅ 정상 |
 
-#### DTO 불일치 사항
+#### DTO 상태
 
 **DashboardDto** (shared)
 ```typescript
@@ -97,7 +98,6 @@
   participants: Array<{
     userId: string;
     name: string;
-    department: string;  // ⚠️ 백엔드 미반환
     responded: boolean;
   }>;
   commonAvailableSlots: Array<{
@@ -105,9 +105,9 @@
     times: string[];
   }>;
   createdAt: string;
-  startDate: string;  // ⚠️ 백엔드 미반환
-  endDate: string;  // ⚠️ 백엔드 미반환
-  durationMinutes: number;  // ⚠️ 백엔드 미반환
+  startDate: string;
+  endDate: string;
+  durationMinutes: number;
 }
 ```
 
@@ -120,13 +120,13 @@
   participants: Array<{
     userId: string;
     name: string;
-    // ⚠️ department 누락
     responded: boolean;
   }>;
-  commonAvailableSlots: string[];  // ⚠️ 배열 형식 불일치
+  commonAvailableSlots: Array<{date: string, times: string[]}>; // ✅ 올바른 형식
   createdAt: string;
-  closedAt?: string;
-  // ⚠️ startDate, endDate, durationMinutes 누락
+  startDate: string; // ✅ 반환됨
+  endDate: string; // ✅ 반환됨
+  durationMinutes: number; // ✅ 반환됨
 }
 ```
 
@@ -189,6 +189,27 @@ export const ERROR_CODES = {
 } as const;
 ```
 
+### ✅ DashboardDto department 필드 제거 (해결 완료 - 2026-01-13)
+
+**위치**: `packages/shared/src/dto.ts`, `apps/api/src/modules/meeting/meeting.service.ts`
+
+**문제**: department 필드가 데이터베이스에 없지만 DTO에 포함되어 있음
+
+**조치**: DTO에서 department 필드 제거, 백엔드에서 department 참조 제거
+
+**현재 상태**:
+```typescript
+// shared DTO - department 제거됨
+export interface DashboardDto {
+  participants: Array<{
+    userId: string;
+    name: string;
+    responded: boolean;
+  }>;
+  // ...
+}
+```
+
 ---
 
 ## 해결 필요 사항 (Action Items)
@@ -206,14 +227,13 @@ export const ERROR_CODES = {
 
 | 이슈 | 조치 | 예상 시간 |
 |------|------|----------|
-| DashboardDto 형식 통일 | 백엔드가 shared DTO에 맞게 반환하도록 수정 | 30분 |
-| CreateMeetingRequestDto 정리 | 프론트엔드에서 location 전송 여부 결정 | 10분 |
+| CreateMeetingRequestDto 정리 | 프론트엔드에서 requiredParticipantIds 제거 | 10분 |
 
 ### 낮은 우선순위
 
 | 이슈 | 조치 | 예상 시간 |
 |------|------|----------|
-| department 필드 처리 | 백엔드에서 department 반환 또는 DTO에서 제거 | 15분 |
+| 없음 | - | - |
 
 ---
 
@@ -222,8 +242,8 @@ export const ERROR_CODES = {
 | 엔드포인트 | 백엔드 | 프론트엔드 | 상태 |
 |------------|---------|-----------|------|
 | GET /api/meetings | ✅ | ✅ | ✅ 정상 |
-| POST /api/meetings | ✅ | ✅ | 🟡 DTO 확인 필요 |
-| GET /api/meetings/:id/dashboard | ✅ | ✅ | 🟡 DTO 확인 필요 |
+| POST /api/meetings | ✅ | ✅ | 🟡 DTO 확인 필요 (participantIds 중복) |
+| GET /api/meetings/:id/dashboard | ✅ | ✅ | ✅ 정상 |
 | POST /api/meetings/:id/respond | ✅ | ✅ | ✅ 정상 |
 | POST /api/meetings/:id/remind/:userId | ✅ | ✅ | ✅ 정상 |
 | POST /api/meetings/:id/confirm | ✅ | ✅ | ✅ 정상 |
