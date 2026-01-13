@@ -1,7 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { AppBar, Toolbar, IconButton, Typography, Box, Button } from '@mui/material';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  CircularProgress,
+} from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface TimeSlotData {
@@ -13,10 +25,44 @@ export default function ResponsePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [name, setName] = useState('');
-  const [availableSlots, setAvailableSlots] = useState<Set<string>>(new Set());
-  const [unavailableSlots, setUnavailableSlots] = useState<Set<string>>(new Set());
+  const [slotSelections, setSlotSelections] = useState<Record<string, 'available' | 'unavailable' | undefined>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { data: dashboardData, isLoading: dashboardLoading, error: dashboardError } = useQuery({
+    queryKey: ['meeting-dashboard', id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      const response = await fetch(`/api/meetings/${id}/dashboard`);
+      if (!response.ok) {
+        const errorBody: unknown = await response.json().catch(() => null);
+        let message = 'Failed to load dashboard';
+        if (errorBody && typeof errorBody === 'object' && 'message' in errorBody) {
+          const maybeMessage = (errorBody as { message?: unknown }).message;
+          if (typeof maybeMessage === 'string') {
+            message = maybeMessage;
+          }
+        }
+        throw new Error(message);
+      }
+      return response.json() as Promise<{
+        requestId: string;
+        title: string;
+        status: string;
+        participants: Array<{ userId: string; name: string; responded: boolean }>;
+      }>;
+    },
+  });
+
+  const participants = dashboardData?.participants ?? [];
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
+
+  useEffect(() => {
+    if (!selectedUserId && participants.length > 0) {
+      setSelectedUserId(participants[0].userId);
+      setName(participants[0].name);
+    }
+  }, [participants, selectedUserId]);
 
   const startDate = new Date('2026-01-20');
   const endDate = new Date('2026-01-24');
@@ -49,7 +95,9 @@ export default function ResponsePage() {
 
         for (let minute = 0; minute < 60; minute += 30) {
           const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-          slots.push(timeStr);
+          const slotDate = new Date(date);
+          slotDate.setHours(hour, minute, 0, 0);
+          slots.push(`${slotDate.toISOString()}|${timeStr}`);
         }
       }
 
@@ -65,39 +113,46 @@ export default function ResponsePage() {
     return hour === 12 || dayOfWeek === 0 || dayOfWeek === 6;
   };
 
-  const isSlotAvailable = (date: string, time: string): boolean => {
-    const key = `${date}-${time}`;
-    if (availableSlots.has(key)) {
-      return true;
-    }
-    if (unavailableSlots.has(key)) {
-      return false;
-    }
-    return true;
+  const getSlotStatus = (slotIso: string) => {
+    return slotSelections[slotIso] ?? 'none';
   };
 
-  const toggleSlot = (date: string, time: string) => {
-    const key = `${date}-${time}`;
+  const toggleSlot = (slotIso: string) => {
+    const key = slotIso;
+    setSlotSelections((prev) => {
+      const next = { ...prev };
+      const current = next[key];
 
-    if (availableSlots.has(key)) {
-      setAvailableSlots(new Set([...availableSlots].filter((k) => k !== key)));
-    } else if (unavailableSlots.has(key)) {
-      setUnavailableSlots(new Set([...unavailableSlots].filter((k) => k !== key)));
-    } else {
-      setAvailableSlots(new Set([...availableSlots, key]));
-    }
+      if (!current) {
+        next[key] = 'available';
+        return next;
+      }
+
+      if (current === 'available') {
+        next[key] = 'unavailable';
+        return next;
+      }
+
+      delete next[key];
+      return next;
+    });
   };
 
   const handleSetAllAvailable = (date: string) => {
     const dateSlots = generateSlots().find((ds) => ds.date === date);
     if (!dateSlots) return;
 
-    dateSlots.slots.forEach((time) => {
-      const key = `${date}-${time}`;
-      if (!isBlockedSlot(date, time)) {
-        setAvailableSlots(new Set([...availableSlots, key]));
-        setUnavailableSlots(new Set([...unavailableSlots].filter((k) => k !== key)));
-      }
+    setSlotSelections((prev) => {
+      const next = { ...prev };
+
+      dateSlots.slots.forEach((slot) => {
+        const [slotIso, time] = slot.split('|');
+        if (!slotIso || !time) return;
+        if (isBlockedSlot(date, time)) return;
+        next[slotIso] = 'available';
+      });
+
+      return next;
     });
   };
 
@@ -105,18 +160,33 @@ export default function ResponsePage() {
     const dateSlots = generateSlots().find((ds) => ds.date === date);
     if (!dateSlots) return;
 
-    dateSlots.slots.forEach((time) => {
-      const key = `${date}-${time}`;
-      if (!isBlockedSlot(date, time)) {
-        setUnavailableSlots(new Set([...unavailableSlots, key]));
-        setAvailableSlots(new Set([...availableSlots].filter((k) => k !== key)));
-      }
+    setSlotSelections((prev) => {
+      const next = { ...prev };
+
+      dateSlots.slots.forEach((slot) => {
+        const [slotIso, time] = slot.split('|');
+        if (!slotIso || !time) return;
+        if (isBlockedSlot(date, time)) return;
+        next[slotIso] = 'unavailable';
+      });
+
+      return next;
     });
   };
 
   const submitMutation = useMutation({
     mutationFn: async () => {
-      if (!name) {
+      if (!selectedUserId) {
+        throw new Error('참여자를 선택해주세요.');
+      }
+
+      const selectedParticipant = participants.find((p) => p.userId === selectedUserId);
+      if (!selectedParticipant) {
+        throw new Error('참여자를 다시 선택해주세요.');
+      }
+
+      const participantName = name || selectedParticipant.name;
+      if (!participantName) {
         throw new Error('이름을 입력해주세요.');
       }
 
@@ -124,10 +194,14 @@ export default function ResponsePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: `user-${id}`,
-          name,
-          availableSlots: Array.from(availableSlots),
-          unavailableSlots: Array.from(unavailableSlots),
+          userId: selectedUserId,
+          name: participantName,
+          availableSlots: Object.entries(slotSelections)
+            .filter(([, status]) => status === 'available')
+            .map(([key]) => key),
+          unavailableSlots: Object.entries(slotSelections)
+            .filter(([, status]) => status === 'unavailable')
+            .map(([key]) => key),
         }),
       });
 
@@ -150,7 +224,7 @@ export default function ResponsePage() {
   });
 
   const handleSubmit = () => {
-    if (availableSlots.size === 0 && unavailableSlots.size === 0) {
+    if (Object.keys(slotSelections).length === 0) {
       alert('최소 하나 이상의 시간을 선택해주세요.');
       return;
     }
@@ -214,6 +288,46 @@ export default function ResponsePage() {
           가능한 시간을 선택하세요 (불가능한 시간은 자동으로 표시됩니다)
         </Typography>
 
+        {dashboardLoading ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            <CircularProgress size={18} />
+            <Typography variant="body2" color="text.secondary">
+              참여자 목록 불러오는 중...
+            </Typography>
+          </Box>
+        ) : dashboardError ? (
+          <Box sx={{ marginBottom: '1.5rem' }}>
+            <Typography variant="body2" color="error">
+              참여자 목록을 불러오지 못했습니다. ({String(dashboardError)})
+            </Typography>
+          </Box>
+        ) : (
+          <Box sx={{ marginBottom: '1.5rem' }}>
+            <FormControl fullWidth size="small" disabled={isSubmitting || participants.length === 0}>
+              <InputLabel id="participant-select-label">참여자</InputLabel>
+              <Select
+                labelId="participant-select-label"
+                value={selectedUserId}
+                label="참여자"
+                onChange={(e) => {
+                  const userId = String(e.target.value);
+                  setSelectedUserId(userId);
+                  const selected = participants.find((p) => p.userId === userId);
+                  if (selected) {
+                    setName(selected.name);
+                  }
+                }}
+              >
+                {participants.map((p) => (
+                  <MenuItem key={p.userId} value={p.userId}>
+                    {p.name} ({p.userId})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        )}
+
         <Box sx={{ marginBottom: '1.5rem' }}>
           <Typography sx={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
             이름 *
@@ -270,22 +384,35 @@ export default function ResponsePage() {
             </Box>
 
             <Box sx={{ display: 'grid', gap: '0.5rem', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))' }}>
-              {dateSlot.slots.map((time) => {
-                const isAvailable = isSlotAvailable(dateSlot.date, time);
-                const isUnavailable = !isAvailable;
+              {dateSlot.slots.map((slot) => {
+                const [slotIso, time] = slot.split('|');
+                if (!slotIso || !time) return null;
+
+                const status = getSlotStatus(slotIso);
+                const isAvailable = status === 'available';
+                const isUnavailable = status === 'unavailable';
                 const isBlocked = isBlockedSlot(dateSlot.date, time);
+                const isUnselected = status === 'none';
 
                 return (
                   <Button
-                    key={time}
+                    key={slotIso}
                     disabled={isBlocked || isSubmitting}
-                    onClick={() => !isBlocked && toggleSlot(dateSlot.date, time)}
-                    variant={isAvailable ? 'contained' : isUnavailable ? 'contained' : 'outlined'}
+                    onClick={() => !isBlocked && toggleSlot(slotIso)}
+                    variant={isUnselected ? 'outlined' : 'contained'}
                     sx={{
                       padding: '0.75rem',
-                      border: isAvailable ? '3px solid #4caf50' : isUnavailable ? '3px solid #f44336' : '2px solid #e0e0e0',
+                      border: isAvailable
+                        ? '3px solid #4caf50'
+                        : isUnavailable
+                          ? '3px solid #f44336'
+                          : '2px solid #e0e0e0',
                       borderRadius: '8px',
-                      backgroundColor: isAvailable ? '#e8f5e9' : isUnavailable ? '#ffebee' : 'white',
+                      backgroundColor: isAvailable
+                        ? '#e8f5e9'
+                        : isUnavailable
+                          ? '#ffebee'
+                          : 'white',
                       color: isAvailable ? '#2e7d32' : isUnavailable ? '#c62828' : '#333',
                       fontWeight: 'bold',
                       opacity: isBlocked ? 0.4 : 1,
@@ -317,9 +444,9 @@ export default function ResponsePage() {
             fullWidth
             size="large"
             onClick={handleSubmit}
-            disabled={isSubmitting || (availableSlots.size === 0 && unavailableSlots.size === 0)}
+            disabled={isSubmitting || Object.keys(slotSelections).length === 0}
           >
-            {isSubmitting ? '제출 중...' : `제출하기 (${availableSlots.size}개 선택)`}
+            {isSubmitting ? '제출 중...' : `제출하기 (${Object.keys(slotSelections).length}개 선택)`}
           </Button>
         </Box>
       </Box>
