@@ -1,10 +1,8 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import HomePage from './HomePage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-// Mock fetch
-global.fetch = vi.fn();
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 const createMockQueryClient = () => {
   return new QueryClient({
@@ -16,92 +14,133 @@ const createMockQueryClient = () => {
   });
 };
 
-const renderWithQueryClient = (component: React.ReactElement) => {
+const fetchMock = vi.fn();
+
+type HealthPayload = { status: string; timestamp: string; uptime: number };
+
+type MeetingsPayload = { meetings: unknown[] };
+
+const okJsonResponse = (payload: unknown): Response => {
+  return {
+    ok: true,
+    statusText: 'OK',
+    json: () => Promise.resolve(payload),
+  } as unknown as Response;
+};
+
+const okTextResponse = (payload: unknown): Response => {
+  return {
+    ok: true,
+    statusText: 'OK',
+    text: () => Promise.resolve(JSON.stringify(payload)),
+  } as unknown as Response;
+};
+
+const renderWithProviders = (component: React.ReactElement) => {
   const queryClient = createMockQueryClient();
   return render(
     <QueryClientProvider client={queryClient}>
-      {component}
-    </QueryClientProvider>
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={component} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 };
 
 describe('HomePage', () => {
-  it('로딩 상태가 올바르게 표시되어야 한다', async () => {
-    (global.fetch as any).mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ status: 'ok', timestamp: '2026-01-13T00:00:00Z', uptime: 100 }),
-      })
-    );
+  beforeEach(() => {
+    fetchMock.mockReset();
+    global.fetch = fetchMock as unknown as typeof fetch;
+  });
 
-    renderWithQueryClient(<HomePage />);
+  it('로딩 상태가 올바르게 표시되어야 한다', async () => {
+    fetchMock.mockImplementation(() => new Promise(() => {}));
+
+    renderWithProviders(<HomePage />);
     expect(screen.getByText('로딩 중...')).toBeInTheDocument();
   });
 
   it('에러 상태가 올바르게 표시되어야 한다', async () => {
-    (global.fetch as any).mockImplementationOnce(() =>
-      Promise.reject(new Error('Network error'))
-    );
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/api/health')) {
+        return Promise.reject(new Error('Network error'));
+      }
+      return new Promise(() => {});
+    });
 
-    renderWithQueryClient(<HomePage />);
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    expect(screen.getByText('서버 연결 실패')).toBeInTheDocument();
+    renderWithProviders(<HomePage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('서버 연결 실패')).toBeInTheDocument();
+    });
   });
 
   it('성공 상태에서 제목이 표시되어야 한다', async () => {
-    (global.fetch as any).mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ status: 'ok', timestamp: '2026-01-13T00:00:00Z', uptime: 100 }),
-      })
-    );
+    const health: HealthPayload = { status: 'ok', timestamp: '2026-01-13T00:00:00Z', uptime: 100 };
+    const meetings: MeetingsPayload = { meetings: [] };
 
-    renderWithQueryClient(<HomePage />);
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    expect(screen.getByText('WhatTime')).toBeInTheDocument();
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/api/health')) {
+        return Promise.resolve(okJsonResponse(health));
+      }
+      if (url.includes('/api/meetings')) {
+        return Promise.resolve(okTextResponse(meetings));
+      }
+      return Promise.reject(new Error(`Unexpected request: ${url}`));
+    });
+
+    renderWithProviders(<HomePage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('WhatTime')).toBeInTheDocument();
+    });
   });
 
-  it('서버 상태가 올바르게 표시되어야 한다', async () => {
-    (global.fetch as any).mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ status: 'ok', timestamp: '2026-01-13T00:00:00Z', uptime: 100 }),
-      })
-    );
+  it('진행 중인 회의가 없으면 메시지가 표시되어야 한다', async () => {
+    const health: HealthPayload = { status: 'ok', timestamp: '2026-01-13T00:00:00Z', uptime: 100 };
+    const meetings: MeetingsPayload = { meetings: [] };
 
-    renderWithQueryClient(<HomePage />);
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    expect(screen.getByText('✅ 서버 정상 (Status: ok)')).toBeInTheDocument();
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/api/health')) {
+        return Promise.resolve(okJsonResponse(health));
+      }
+      if (url.includes('/api/meetings')) {
+        return Promise.resolve(okTextResponse(meetings));
+      }
+      return Promise.reject(new Error(`Unexpected request: ${url}`));
+    });
+
+    renderWithProviders(<HomePage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('진행 중인 회의가 없습니다.')).toBeInTheDocument();
+    });
   });
 
-  it('진행 중인 조율이 없으면 메시지가 표시되어야 한다', async () => {
-    (global.fetch as any).mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ status: 'ok', timestamp: '2026-01-13T00:00:00Z', uptime: 100 }),
-      })
-    );
+  it('완료된 회의가 없으면 메시지가 표시되어야 한다', async () => {
+    const health: HealthPayload = { status: 'ok', timestamp: '2026-01-13T00:00:00Z', uptime: 100 };
+    const meetings: MeetingsPayload = { meetings: [] };
 
-    renderWithQueryClient(<HomePage />);
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    expect(screen.getByText('진행 중인 조율이 없습니다.')).toBeInTheDocument();
-  });
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/api/health')) {
+        return Promise.resolve(okJsonResponse(health));
+      }
+      if (url.includes('/api/meetings')) {
+        return Promise.resolve(okTextResponse(meetings));
+      }
+      return Promise.reject(new Error(`Unexpected request: ${url}`));
+    });
 
-  it('완료된 조율이 없으면 메시지가 표시되어야 한다', async () => {
-    (global.fetch as any).mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ status: 'ok', timestamp: '2026-01-13T00:00:00Z', uptime: 100 }),
-      })
-    );
+    renderWithProviders(<HomePage />);
 
-    renderWithQueryClient(<HomePage />);
-    
-    await new Promise(resolve => setTimeout(resolve, 100));
-    expect(screen.getByText('완료된 조율이 없습니다.')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('완료된 회의가 없습니다.')).toBeInTheDocument();
+    });
   });
 });

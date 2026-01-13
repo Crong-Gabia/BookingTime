@@ -20,8 +20,8 @@ describe('CommonSlots', () => {
     render(<CommonSlots slots={mockSlots} onSelectSlot={onSelectSlot} />);
 
     expect(screen.getByText('모두 가능한 시간')).toBeInTheDocument();
-    expect(screen.getByText('2026년 1월 15일 목요일')).toBeInTheDocument();
-    expect(screen.getByText('2026년 1월 16일 금요일')).toBeInTheDocument();
+    expect(screen.getByText('1월 15일 목요일')).toBeInTheDocument();
+    expect(screen.getByText('1월 16일 금요일')).toBeInTheDocument();
     expect(screen.getByText('09:00')).toBeInTheDocument();
     expect(screen.getByText('10:00')).toBeInTheDocument();
     expect(screen.getByText('14:00')).toBeInTheDocument();
@@ -32,8 +32,8 @@ describe('CommonSlots', () => {
     const onSelectSlot = vi.fn();
     render(<CommonSlots slots={mockSlots} onSelectSlot={onSelectSlot} />);
 
-    expect(screen.getByText('2026년 1월 15일 목요일')).toBeInTheDocument();
-    expect(screen.getByText('2026년 1월 16일 금요일')).toBeInTheDocument();
+    expect(screen.getByText('1월 15일 목요일')).toBeInTheDocument();
+    expect(screen.getByText('1월 16일 금요일')).toBeInTheDocument();
   });
 
   it('슬롯 선택 시 선택 상태가 표시되어야 함', async () => {

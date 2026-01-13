@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
@@ -35,21 +35,26 @@ export default function ResponsePage() {
     queryFn: async () => {
       const response = await fetch(`/api/meetings/${id}/dashboard`);
       if (!response.ok) {
-        const errorBody: unknown = await response.json().catch(() => null);
-        let message = 'Failed to load dashboard';
-        if (errorBody && typeof errorBody === 'object' && 'message' in errorBody) {
-          const maybeMessage = (errorBody as { message?: unknown }).message;
-          if (typeof maybeMessage === 'string') {
-            message = maybeMessage;
-          }
-        }
-        throw new Error(message);
+        type ErrorBody = { message?: unknown };
+        const message = await response
+          .json()
+          .then((body: unknown) => {
+            if (body && typeof body === 'object' && 'message' in body) {
+              const maybeMessage = (body as ErrorBody).message;
+              return typeof maybeMessage === 'string' ? maybeMessage : null;
+            }
+            return null;
+          })
+          .catch(() => null);
+        throw new Error(message ?? 'Failed to load dashboard');
       }
       return response.json() as Promise<{
         requestId: string;
         title: string;
         status: string;
         participants: Array<{ userId: string; name: string; responded: boolean }>;
+        startDate: string;
+        endDate: string;
       }>;
     },
   });
@@ -64,13 +69,25 @@ export default function ResponsePage() {
     }
   }, [participants, selectedUserId]);
 
-  const startDate = new Date('2026-01-20');
-  const endDate = new Date('2026-01-24');
+  const startDateString = dashboardData?.startDate;
+  const endDateString = dashboardData?.endDate;
 
-  const generateDateRange = (): string[] => {
+  const timeSlotData = useMemo<TimeSlotData[]>(() => {
+    if (!startDateString || !endDateString) return [];
+
+    const startDate = new Date(startDateString);
+    const endDate = new Date(endDateString);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      return [];
+    }
+
     const dates: string[] = [];
     const current = new Date(startDate);
+    current.setHours(0, 0, 0, 0);
+
     const end = new Date(endDate);
+    end.setHours(0, 0, 0, 0);
 
     while (current <= end) {
       const dayOfWeek = current.getDay();
@@ -80,14 +97,7 @@ export default function ResponsePage() {
       current.setDate(current.getDate() + 1);
     }
 
-    return dates;
-  };
-
-  const generateSlots = (): TimeSlotData[] => {
-    const dates = generateDateRange();
-    const result: TimeSlotData[] = [];
-
-    for (const date of dates) {
+    return dates.map((date) => {
       const slots: string[] = [];
 
       for (let hour = 9; hour < 18; hour++) {
@@ -101,11 +111,9 @@ export default function ResponsePage() {
         }
       }
 
-      result.push({ date, slots });
-    }
-
-    return result;
-  };
+      return { date, slots };
+    });
+  }, [startDateString, endDateString]);
 
   const isBlockedSlot = (date: string, time: string): boolean => {
     const hour = parseInt(time.split(':')[0]);
@@ -139,7 +147,7 @@ export default function ResponsePage() {
   };
 
   const handleSetAllAvailable = (date: string) => {
-    const dateSlots = generateSlots().find((ds) => ds.date === date);
+    const dateSlots = timeSlotData.find((ds) => ds.date === date);
     if (!dateSlots) return;
 
     setSlotSelections((prev) => {
@@ -157,7 +165,7 @@ export default function ResponsePage() {
   };
 
   const handleSetAllUnavailable = (date: string) => {
-    const dateSlots = generateSlots().find((ds) => ds.date === date);
+    const dateSlots = timeSlotData.find((ds) => ds.date === date);
     if (!dateSlots) return;
 
     setSlotSelections((prev) => {
@@ -233,7 +241,6 @@ export default function ResponsePage() {
     submitMutation.mutate();
   };
 
-  const timeSlotData = generateSlots();
 
   if (isSubmitted) {
     return (

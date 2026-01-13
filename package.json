@@ -7,7 +7,7 @@
     "dev": "pnpm --filter web dev",
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter api dev",
-    "predev:all": "sh -c 'pids=$(lsof -ti:3000,5173 2>/dev/null); if [ -n \\\"$pids\\\" ]; then kill -9 $pids; fi'",
+    "predev:all": "kill-port 3000 5173",
     "dev:all": "pnpm -r --filter api --filter web --parallel dev",
     "build": "pnpm --filter web build",
     "build:all": "pnpm --filter shared build && pnpm --filter api build && pnpm --filter web build",
@@ -30,6 +30,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "kill-port": "^2.0.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "npm:rolldown-vite@7.2.5"
