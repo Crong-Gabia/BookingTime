@@ -1,3 +1,11 @@
+export async function getAllMeetings() {
+  const response = await fetch('/api/meetings');
+  if (!response.ok) {
+    throw new Error('Failed to fetch meetings');
+  }
+  return response.json();
+}
+
 export async function fetchDashboard(requestId: string) {
   const response = await fetch(`/api/meetings/${requestId}/dashboard`);
   if (!response.ok) {
@@ -56,14 +64,17 @@ export async function sendReminder(requestId: string, userId: string) {
 
 export async function confirmMeeting(payload: {
   requestId: string;
-  confirmedStart: string;
-  confirmedEnd: string;
-  roomId: string;
+  selectedTimeSlot: string;
+  location: string;
 }) {
-  const response = await fetch('/api/meetings/confirm', {
+  const response = await fetch(`/api/meetings/${payload.requestId}/confirm`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      requestId: payload.requestId,
+      selectedTimeSlot: payload.selectedTimeSlot,
+      location: payload.location,
+    }),
   });
   if (!response.ok) {
     throw new Error('Failed to confirm meeting');
@@ -112,9 +123,8 @@ export type SubmitResponseDto = {
 
 export type ConfirmMeetingDto = {
   requestId: string;
-  confirmedStart: string;
-  confirmedEnd: string;
-  roomId: string;
+  selectedTimeSlot: string;
+  location: string;
 };
 
 export type CreateMeetingResponse = {
