@@ -265,3 +265,70 @@ ERROR self signed certificate in certificate chain fatal
 - **작업 완료 후**: 별도 기능 브랜치에서 develop로 PR 생성
 - **PR 없이 develop에 직접 push 가능한 항목**: 문서/지침 변경만
 
+## PR 워크플로우 및 AI 리뷰
+
+### PR 생성 후 AI 리뷰 호출
+
+PR을 생성한 후 반드시 AI 리뷰를 호출해야 합니다:
+
+```bash
+# PR 생성
+gh pr create --base develop --title "feat: 기능 설명" --body "..."
+
+# PR에 AI 리뷰 요청 댓글 추가
+gh pr comment <PR_NUMBER> --body "/gemini review"
+```
+
+### AI 리뷰 확인 및 피드백 반영
+
+1. **리뷰 댓글 모니터링**
+   ```bash
+   # PR 댓글 확인
+   gh pr view <PR_NUMBER> --comments
+
+   # 또는 웹에서 확인: https://github.com/<owner>/<repo>/pull/<PR_NUMBER>
+   ```
+
+2. **피드백 반영**
+   - AI가 제시한 문제점을 수정
+   - 수정 사항을 커밋 후 push
+   - PR 댓글로 수정 사항을 기록
+
+3. **수정 사항 알리기**
+   ```bash
+   # 수정 사항 댓글 추가
+   gh pr comment <PR_NUMBER> --body "피드백 반영 완료:
+   - 이슈1: 해결 방법 설명
+   - 이슈2: 해결 방법 설명
+   "
+   ```
+
+### 지속적인 작업 진행
+
+PR이 열려있는 동안 다른 작업을 계속 진행합니다:
+
+```bash
+# 다른 브랜치로 전환하여 새 작업 시작
+git checkout develop
+git pull origin develop
+git checkout -b feature/다른-기능
+
+# 새로운 작업 진행...
+# 기존 PR에 /gemini review 호출 후 계속 다른 작업 가능
+```
+
+### 댓글 확인 자동화 (선택사항)
+
+```bash
+# 특정 사용자/멘션의 댓글만 확인
+gh pr view <PR_NUMBER> --comments | grep -A 5 "<사용자명>"
+```
+
+### 완료 체크리스트
+
+PR이 다음 조건을 만족할 때까지 반복합니다:
+- [ ] 모든 AI 리뷰 피드백이 반영됨
+- [ ] CI/CD 체크가 모두 통과 (Build, Test, Lint)
+- [ ] 사용자의 승인이 있음
+- [ ] PR 댓글에 모든 수정 사항이 기록됨
+
