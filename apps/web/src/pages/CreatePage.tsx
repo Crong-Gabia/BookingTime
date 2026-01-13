@@ -1,12 +1,20 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, IconButton, Typography, Box, Button, TextField, Container } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Typography, Box, Button, TextField, Container, MenuItem } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface ParticipantInput {
   email: string;
   name: string;
 }
+
+const DURATION_OPTIONS = [
+  { value: 30, label: '30분' },
+  { value: 60, label: '1시간' },
+  { value: 90, label: '1시간 30분' },
+  { value: 120, label: '2시간' },
+  { value: 180, label: '3시간' },
+];
 
 export default function CreatePage() {
   const navigate = useNavigate();
@@ -184,11 +192,11 @@ export default function CreatePage() {
             onChange={(e) => setDurationMinutes(Number(e.target.value))}
             disabled={isSubmitting}
           >
-            <option value={30}>30분</option>
-            <option value={60}>1시간</option>
-            <option value={90}>1시간 30분</option>
-            <option value={120}>2시간</option>
-            <option value={180}>3시간</option>
+            {DURATION_OPTIONS.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
           </TextField>
         </Box>
 
@@ -209,10 +217,9 @@ export default function CreatePage() {
           </Typography>
           <Typography variant="body2" component="div">
             <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
-              <li>회의 시간은 09:00-18:00 사이 30분 단위로만 가능합니다.</li>
-              <li>점심시간(12:00-13:00)은 자동으로 제외됩니다.</li>
+              <li>회의 시간은 30분 단위로 생성됩니다.</li>
+              <li>시간/요일 제한은 추후 옵션으로 제공할 수 있습니다.</li>
               <li>생성 후 대시보드에서 참석자들에게 응답 링크를 공유하세요.</li>
-              <li>주말은 제외됩니다.</li>
             </ul>
           </Typography>
         </Box>
