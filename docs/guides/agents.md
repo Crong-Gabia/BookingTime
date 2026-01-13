@@ -332,3 +332,110 @@ PR이 다음 조건을 만족할 때까지 반복합니다:
 - [ ] 사용자의 승인이 있음
 - [ ] PR 댓글에 모든 수정 사항이 기록됨
 
+### PR 머지 (Merge)
+
+머지 체크리스트:
+1. **머지 전 확인**
+   - [ ] AI 리뷰 피드백이 모두 반영되었는지 확인
+   - [ ] 모든 CI/CD 체크가 통과했는지 확인 (Build, Test, Lint)
+   - [ ] 사용자의 승인을 받았는지 확인
+
+2. **머지 방법 (웹)**
+   1. GitHub PR 페이지 접속
+   2. "Merge pull request" 클릭
+   3. "Squash and merge" 선택 (권장)
+   4. 머지 메시지 확인 후 "Confirm merge" 클릭
+
+3. **머지 방법 (CLI)**
+   ```bash
+   # 머지 (Squash and merge)
+   gh pr merge <PR_NUMBER> --squash --delete-branch
+
+   # 또는 단순 병합
+   gh pr merge <PR_NUMBER> --merge --delete-branch
+   ```
+
+4. **머지 후 정리**
+   ```bash
+   # develop 브랜치로 이동
+   git checkout develop
+   git pull origin develop
+
+   # 로컬 브랜치 삭제
+   git branch -d feature/<기능명>
+   ```
+
+### AI 자동 머지 (에이전트용)
+
+에이전트가 PR을 머지할 때는 다음 절차를 따릅니다:
+
+1. **PR 상태 확인**
+   ```bash
+   # 여러 PR의 상태를 병렬로 확인
+   gh pr list --state open --json number,title,mergeable,state,reviewDecision,headRefName
+   ```
+
+2. **각 PR별 검증**
+   - AI 리뷰 완료 여부 확인 (`/gemini review` 댓글 존재)
+   - CI/CD 통과 여부 확인 (status: success)
+   - ReviewDecision 확인 (approved 상태)
+
+3. **조건 충족 시 머지**
+   ```bash
+   # 조건 충족 시 자동 머지
+   for PR in $(gh pr list --state open --json number,title,mergeable,state,reviewDecision --jq '.[] | select(.reviewDecision == "APPROVED" and .state == "OPEN") | .number'); do
+     gh pr merge "$PR" --squash --delete-branch
+   done
+   ```
+
+4. **머지 실패 처리**
+   - 머지 실패 시 에러 메시지 기록
+   - 충돌(conflict) 발생 시 사용자에게 알림
+   - 작업 기록에 실패 원인 기록
+
+### PR 머지 자동화 스크립트 (선택사항)
+
+```bash
+#!/bin/bash
+# scripts/auto-merge-ready-prs.sh
+
+# 머지 가능한 PR 자동 머지 스크립트
+# 사용 조건:
+# 1. AI 리뷰 완료
+# 2. CI/CD 통과
+# 3. 사용자 승인 (approved)
+
+set -e
+
+echo "Checking merge-ready PRs..."
+
+# 머지 가능한 PR 목록 조회
+MERGEABLE_PRS=$(gh pr list \
+  --state open \
+  --json number,title,mergeable,state,reviewDecision \
+  --jq '.[] | select(.reviewDecision == "APPROVED" and .state == "OPEN" and .mergeable == true) | "\(.number)|\(.title)"'
+)
+
+if [ -z "$MERGEABLE_PRS" ]; then
+  echo "No merge-ready PRs found."
+  exit 0
+fi
+
+echo "Found merge-ready PRs:"
+echo "$MERGEABLE_PRS"
+echo ""
+
+# 각 PR 머지
+echo "$MERGEABLE_PRS" | while IFS='|' read -r PR_NUMBER PR_TITLE; do
+  echo "Merging PR #$PR_NUMBER: $PR_TITLE"
+
+  # 머지
+  gh pr merge "$PR_NUMBER" --squash --delete-branch
+
+  echo "PR #$PR_NUMBER merged successfully."
+  echo ""
+done
+
+echo "All merge-ready PRs merged."
+```
+

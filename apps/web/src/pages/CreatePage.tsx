@@ -66,7 +66,6 @@ export default function CreatePage() {
           description,
           organizerId: 'organizer-1',
           participantIds: validParticipants.map((p) => p.email),
-          requiredParticipantIds: validParticipants.map((p) => p.email),
           startDate,
           endDate,
           durationMinutes,

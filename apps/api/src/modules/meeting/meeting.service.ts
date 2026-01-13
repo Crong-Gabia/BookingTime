@@ -98,7 +98,6 @@ export class MeetingService {
       participants: request.participants.map((p) => ({
         userId: p.userId,
         name: p.name,
-        department: null,
         responded: p.responded,
       })),
       commonAvailableSlots,
