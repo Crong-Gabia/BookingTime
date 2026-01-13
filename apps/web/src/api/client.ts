@@ -29,3 +29,16 @@ export async function requestJson<T>(input: RequestInfo, init?: RequestInit): Pr
   const normalized = payload === null ? undefined : payload;
   return normalized as T;
 }
+
+export interface Meeting {
+  id: string;
+  title: string;
+  status: string;
+  responseRate: number;
+  createdAt: string;
+}
+
+export async function getAllMeetings(): Promise<{ meetings: Meeting[] }> {
+  return requestJson('/api/meetings');
+}
+

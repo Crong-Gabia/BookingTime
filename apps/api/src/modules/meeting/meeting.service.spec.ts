@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MeetingService } from './meeting.service';
-import { PrismaService } from '../common/prisma/prisma.service';
+import { PrismaService } from '../../common/prisma/prisma.service';
 import { IRoomAdapter, IHolidayAdapter, IHrAdapter } from './adapters/interfaces';
-import { CreateMeetingRequestDto, MeetingRequestStatus } from '@shared/dto';
+import { CreateMeetingRequestDto, MeetingRequestStatus } from 'shared';
 
 describe('MeetingService', () => {
   let service: MeetingService;

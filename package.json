@@ -4,10 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "pnpm --filter web dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api dev",
+    "dev:all": "pnpm -r --filter api --filter web --parallel dev",
+    "build": "pnpm --filter web build",
+    "build:all": "pnpm --filter shared build && pnpm --filter api build && pnpm --filter web build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "pnpm --filter web preview",
+    "clean": "rm -rf apps/*/dist",
+    "kill:all": "pkill -f 'nest.*start|vite|node.*main'"
   },
   "dependencies": {
     "react": "^19.2.0",

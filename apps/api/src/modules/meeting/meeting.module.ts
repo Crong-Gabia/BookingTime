@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MeetingController } from './meeting.controller';
 import { MeetingService } from './meeting.service';
-import { PrismaModule } from '../common/prisma/prisma.module';
+import { PrismaModule } from '../../common/prisma/prisma.module';
 import { RoomAdapter } from './adapters/room.adapter';
 import { HolidayAdapter } from './adapters/holiday.adapter';
 import { HrAdapter } from './adapters/hr.adapter';

@@ -8,11 +8,16 @@ import {
   ConfirmMeetingDto,
   ConfirmMeetingResponseDto,
   RemindResponseDto,
-} from '@shared/dto';
+} from 'shared';
 
 @Controller('meetings')
 export class MeetingController {
   constructor(private readonly meetingService: MeetingService) {}
+
+  @Get()
+  async getAll(): Promise<{ meetings: Array<{ id: string; title: string; status: string; responseRate: number; createdAt: string }> }> {
+    return this.meetingService.getAllMeetings();
+  }
 
   @Post()
   async create(

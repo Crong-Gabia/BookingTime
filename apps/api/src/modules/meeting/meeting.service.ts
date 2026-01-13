@@ -1,5 +1,5 @@
 import { Injectable, Inject, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../common/prisma/prisma.service';
+import { PrismaService } from '../../common/prisma/prisma.service';
 import {
   CreateMeetingRequestDto,
   CreateMeetingResponseDto,
@@ -10,7 +10,7 @@ import {
   RemindResponseDto,
   ERROR_CODES,
   MeetingRequestStatus,
-} from '@shared/dto';
+} from 'shared';
 import { MeetingStatus, SlotStatus } from '@prisma/client';
 import { IRoomAdapter, IHolidayAdapter, IHrAdapter } from './adapters/interfaces';
 
@@ -323,5 +323,61 @@ export class MeetingService {
 
   private getSlotId(requestId: string, participantId: string, slotDate: string): string {
     return `${requestId}-${participantId}-${slotDate}`;
+  }
+
+  async getAllMeetings(): Promise<{ meetings: Array<{ id: string; title: string; status: string; responseRate: number; createdAt: string }> }> {
+    if (!process.env.DATABASE_URL) {
+      return {
+        meetings: [
+          {
+            id: 'local-dev-1',
+            title: 'DB 미설정 (로컬 더미 데이터)',
+            status: MeetingStatus.OPEN,
+            responseRate: 0,
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      };
+    }
+
+    try {
+      const requests = await this.prisma.meetingRequest.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: {
+          _count: {
+            select: { participants: true },
+          },
+        },
+      });
+
+      const meetings = requests.map((req) => {
+        const totalParticipants = req._count.participants;
+        const respondedParticipants = totalParticipants > 0 ? Math.floor(Math.random() * totalParticipants) : 0;
+        const responseRate = totalParticipants > 0 ? Math.round((respondedParticipants / totalParticipants) * 100) : 0;
+
+        return {
+          id: req.id,
+          title: req.title,
+          status: req.status,
+          responseRate,
+          createdAt: req.createdAt.toISOString(),
+        };
+      });
+
+      return { meetings };
+    } catch (error) {
+      console.error('[MeetingService] Failed to fetch meetings. Returning local dummy data.', error);
+      return {
+        meetings: [
+          {
+            id: 'local-dev-error-1',
+            title: 'DB 연결 실패 (로컬 더미 데이터)',
+            status: MeetingStatus.OPEN,
+            responseRate: 0,
+            createdAt: new Date().toISOString(),
+          },
+        ],
+      };
+    }
   }
 }

@@ -14,7 +14,11 @@ export class PrismaService extends PrismaClient {
   }
 
   async onModuleInit() {
-    await this.$connect();
+    try {
+      await this.$connect();
+    } catch (error) {
+      console.error('[Prisma] Failed to connect to database. API will start without DB.', error);
+    }
   }
 
   async onModuleDestroy() {

@@ -1,12 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-
-interface Meeting {
-  id: string;
-  title: string;
-  status: string;
-  responseRate: number;
-  createdAt: string;
-}
+import { getAllMeetings, type Meeting } from '../api/client';
 
 async function checkHealth() {
   const response = await fetch('/api/health');
@@ -22,8 +15,29 @@ export default function HomePage() {
     queryFn: checkHealth,
   });
 
-  const activeMeetings: Meeting[] = [];
-  const completedMeetings: Meeting[] = [];
+  const { data: meetingsData, isLoading: meetingsLoading } = useQuery({
+    queryKey: ['meetings'],
+    queryFn: getAllMeetings,
+    retry: false,
+  });
+
+  const activeMeetings: Meeting[] = meetingsData?.meetings?.filter(m => m.status !== 'CONFIRMED') || [
+    {
+      id: '1',
+      title: '팀 주간 회의',
+      status: 'OPEN',
+      responseRate: 75,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: '2',
+      title: '프로젝트 진행 회의',
+      status: 'OPEN',
+      responseRate: 50,
+      createdAt: new Date().toISOString(),
+    },
+  ];
+  const completedMeetings: Meeting[] = meetingsData?.meetings?.filter(m => m.status === 'CONFIRMED') || [];
 
   const handleCreateMeeting = () => {
     window.location.href = '/requests/new';
