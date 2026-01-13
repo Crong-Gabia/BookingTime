@@ -48,3 +48,13 @@
   - fetchDashboard, createMeeting, submitResponse, sendReminder, confirmMeeting 함수
   - 각종 DTO 타입 정의 (DashboardData, CreateMeetingRequestDto, SubmitResponseDto, ConfirmMeetingDto, CreateMeetingResponse)
 - API 래퍼 커밋 및 push (feat: API 래퍼 구현 (health, meeting))
+
+## 추가 작업 (2026-01-13 오후)
+- gh CLI 설치 및 인증 완료
+- PR 생성 완료: https://github.com/Crong-Gabia/BookingTime/pull/1
+- 페이지 리팩터링 완료 (MUI 컴포넌트 적용)
+  - HomePage: MeetingCard, FloatingButton 컴포넌트 적용
+  - DashboardPage: ParticipantList, CommonSlots, RoomSelector, SectionHeader 컴포넌트 적용
+  - ResponsePage: TimeGrid, StickyActionBar 컴포넌트 적용
+  - CreatePage: MUI TextField, Button, Grid 컴포넌트 적용
+- 각 페이지별 커밋 및 push 완료
