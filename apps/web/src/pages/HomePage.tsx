@@ -55,11 +55,26 @@ export default function HomePage() {
       </Box>
 
       {healthData && (
-        <Box sx={{ mb: 4 }}>
-          <Typography color="success.main">
-            ✅ 서버 정상 (Status: {healthData.status})
-          </Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" fontWeight={600}>
+          대시보드
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/dashboard')}
+            sx={{ mr: 1 }}
+          >
+            대시보드로 이동
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/requests/new')}
+          >
+            새 일정
+          </Button>
         </Box>
+      </Box>
       )}
 
       <Typography variant="h6" gutterBottom fontWeight={600}>

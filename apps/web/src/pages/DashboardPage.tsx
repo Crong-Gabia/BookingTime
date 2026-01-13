@@ -142,81 +142,18 @@ export default function DashboardPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <SectionHeader title={data.title} subtitle="주최자 대시보드" />
-
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Box sx={{ backgroundColor: 'grey.50', p: 3, borderRadius: 2 }}>
-            <Typography variant="subtitle1" gutterBottom fontWeight={600}>
-              응답 현황 ({respondedCount}/{totalCount}, {responseRate}%)
-            </Typography>
-            <ParticipantList
-              participants={participants}
-              onRemind={handleRemind}
-            />
-            
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="subtitle2" gutterBottom fontWeight={600}>
-                링크 공유
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<ContentCopyIcon />}
-                  onClick={handleCopyLink}
-                >
-                  링크 복사
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<ShareIcon />}
-                  onClick={handleShare}
-                >
-                  공유
-                </Button>
-              </Box>
-            </Box>
-          </Box>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Box sx={{ backgroundColor: 'primary.light', p: 3, borderRadius: 2 }}>
-            <SectionHeader title="공통 가능 시간" subtitle="시간을 선택하고 확정하세요" />
-            
-            {commonSlots.length === 0 ? (
-              <Alert severity="info" sx={{ mt: 2 }}>
-                아직 모든 참석자가 응답하지 않았거나 가능한 시간이 없습니다.
-              </Alert>
-            ) : (
-              <>
-                <CommonSlots
-                  slots={commonSlots}
-                  onSelectSlot={(date, time) => setSelectedTimeSlot(time)}
-                />
-                
-                <Box sx={{ mt: 3 }}>
-                  <RoomSelector
-                    rooms={mockRooms}
-                    selectedRoomId={selectedRoomId}
-                    onChange={setSelectedRoomId}
-                  />
-                  
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    size="large"
-                    onClick={handleConfirm}
-                    disabled={confirmMutation.isPending || !selectedTimeSlot}
-                    sx={{ mt: 2, py: 1.5 }}
-                  >
-                    {confirmMutation.isPending ? '확정 중...' : '최종 확정'}
-                  </Button>
-                </Box>
-              </>
-            )}
-          </Box>
-        </Grid>
-      </Grid>
+      <Typography variant="h4" gutterBottom fontWeight={600}>
+        대시보드
+      </Typography>
+      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+        <Button
+          variant="contained"
+          onClick={() => navigate('/dashboard')}
+          sx={{ mr: 1 }}
+        >
+          대시보드로 이동
+        </Button>
+      </Box>
     </Container>
   );
 }
