@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, IconButton, Typography, Box, Button, TextField, Container } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Typography, Box, Button, TextField, Container, MenuItem } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface ParticipantInput {
@@ -184,11 +184,11 @@ export default function CreatePage() {
             onChange={(e) => setDurationMinutes(Number(e.target.value))}
             disabled={isSubmitting}
           >
-            <option value={30}>30분</option>
-            <option value={60}>1시간</option>
-            <option value={90}>1시간 30분</option>
-            <option value={120}>2시간</option>
-            <option value={180}>3시간</option>
+            <MenuItem value={30}>30분</MenuItem>
+            <MenuItem value={60}>1시간</MenuItem>
+            <MenuItem value={90}>1시간 30분</MenuItem>
+            <MenuItem value={120}>2시간</MenuItem>
+            <MenuItem value={180}>3시간</MenuItem>
           </TextField>
         </Box>
 
@@ -209,10 +209,9 @@ export default function CreatePage() {
           </Typography>
           <Typography variant="body2" component="div">
             <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
-              <li>회의 시간은 09:00-18:00 사이 30분 단위로만 가능합니다.</li>
-              <li>점심시간(12:00-13:00)은 자동으로 제외됩니다.</li>
+              <li>회의 시간은 30분 단위로 생성됩니다.</li>
+              <li>시간/요일 제한은 추후 옵션으로 제공할 수 있습니다.</li>
               <li>생성 후 대시보드에서 참석자들에게 응답 링크를 공유하세요.</li>
-              <li>주말은 제외됩니다.</li>
             </ul>
           </Typography>
         </Box>
