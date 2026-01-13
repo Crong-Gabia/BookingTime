@@ -43,3 +43,8 @@
   - PR 링크: https://github.com/Crong-Gabia/BookingTime/pull/new/feature/frontend-components
   - Base: develop 브랜치
   - PR 내용은 본 파일 참조
+- API 래퍼 구현 완료 (health.ts, meeting.ts, index.ts)
+  - checkHealth 함수 및 HealthResponse 타입
+  - fetchDashboard, createMeeting, submitResponse, sendReminder, confirmMeeting 함수
+  - 각종 DTO 타입 정의 (DashboardData, CreateMeetingRequestDto, SubmitResponseDto, ConfirmMeetingDto, CreateMeetingResponse)
+- API 래퍼 커밋 및 push (feat: API 래퍼 구현 (health, meeting))
