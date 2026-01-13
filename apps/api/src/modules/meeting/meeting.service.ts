@@ -77,6 +77,20 @@ export class MeetingService {
 
     const commonSlots = await this.findCommonAvailableSlots(requestId);
 
+    const groupedByDate: Record<string, string[]> = {};
+    for (const slotIso of commonSlots) {
+      const dateKey = slotIso.split('T')[0];
+      groupedByDate[dateKey] ??= [];
+      groupedByDate[dateKey].push(slotIso);
+    }
+
+    const commonAvailableSlots = Object.entries(groupedByDate)
+      .map(([date, times]) => ({
+        date,
+        times: times.sort(),
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
     return {
       requestId: request.id,
       title: request.title,
@@ -84,11 +98,14 @@ export class MeetingService {
       participants: request.participants.map((p) => ({
         userId: p.userId,
         name: p.name,
+        department: null,
         responded: p.responded,
       })),
-      commonAvailableSlots: commonSlots,
+      commonAvailableSlots,
       createdAt: request.createdAt.toISOString(),
-      closedAt: request.closedAt?.toISOString(),
+      startDate: request.startDate.toISOString(),
+      endDate: request.endDate.toISOString(),
+      durationMinutes: request.durationMinutes,
     };
   }
 

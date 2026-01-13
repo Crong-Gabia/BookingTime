@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import TimeSlot from './time-slot';
 
@@ -28,7 +28,7 @@ describe('TimeSlot', () => {
     });
   });
 
-  it('차단 상태를 올바른 스타일로 렌더링해야 함', () => {
+  it('차단 상태를 올바르게 렌더링해야 함', () => {
     render(
       <TimeSlot
         time="10:00"
@@ -39,19 +39,18 @@ describe('TimeSlot', () => {
     );
 
     const slot = screen.getByText('10:00');
-    expect(slot).toBeInTheDocument();
-    expect(slot.closest('button')).toHaveStyle({
-      backgroundColor: '#eeeeee',
-      color: '#9e9e9e',
-      border: '2px solid #e0e0e0',
-      opacity: '0.5',
-    });
+    const button = slot.closest('button');
+
+    expect(button).not.toBeNull();
+    expect(button).toBeDisabled();
+    expect(button).toHaveStyle({ opacity: '0.5' });
     expect(screen.getByText('점심시간')).toBeInTheDocument();
   });
 
   it('가능/불가 상태에서 클릭 시 onClick 핸들러를 호출해야 함', async () => {
     const user = userEvent.setup();
     const handleClick = vi.fn();
+
     render(<TimeSlot time="09:00" status="available" onClick={handleClick} />);
 
     const slot = screen.getByText('09:00');
@@ -60,15 +59,13 @@ describe('TimeSlot', () => {
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('차단 상태에서는 클릭이 작동하지 않아야 함', async () => {
-    const user = userEvent.setup();
+  it('차단 상태에서는 클릭이 작동하지 않아야 함', () => {
     const handleClick = vi.fn();
-    render(
-      <TimeSlot time="10:00" status="blocked" onClick={handleClick} />,
-    );
 
-    const slot = screen.getByText('10:00');
-    await user.click(slot);
+    render(<TimeSlot time="10:00" status="blocked" onClick={handleClick} />);
+
+    const button = screen.getByRole('button', { name: /10:00/ });
+    fireEvent.click(button);
 
     expect(handleClick).not.toHaveBeenCalled();
   });

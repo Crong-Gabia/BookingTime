@@ -10,7 +10,9 @@ describe('RoomSelector', () => {
     { id: 'room-3', name: '회의실 C', capacity: 8 },
   ];
 
-  it('모든 회의실 옵션을 올바르게 렌더링해야 함', () => {
+  it('모든 회의실 옵션을 올바르게 렌더링해야 함', async () => {
+    const user = userEvent.setup();
+
     render(
       <RoomSelector
         rooms={mockRooms}
@@ -18,6 +20,9 @@ describe('RoomSelector', () => {
         onChange={vi.fn()}
       />,
     );
+
+    const select = screen.getByRole('combobox');
+    await user.click(select);
 
     expect(screen.getByText('회의실 A (최대 10인)')).toBeInTheDocument();
     expect(screen.getByText('회의실 B (최대 20인)')).toBeInTheDocument();
@@ -56,7 +61,7 @@ describe('RoomSelector', () => {
     );
 
     const select = screen.getByRole('combobox');
-    expect(select).toBeDisabled();
+    expect(select).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('helper text를 올바르게 표시해야 함', () => {
@@ -80,7 +85,7 @@ describe('RoomSelector', () => {
       />,
     );
 
-    const select = screen.getByRole('combobox') as HTMLInputElement;
-    expect(select.value).toBe('room-2');
+    const select = screen.getByRole('combobox');
+    expect(select).toHaveTextContent('회의실 B');
   });
 });

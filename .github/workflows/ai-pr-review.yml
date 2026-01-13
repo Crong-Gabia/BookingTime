@@ -1,0 +1,152 @@
+name: AI PR Review
+
+on:
+  pull_request:
+    types: [labeled, synchronize, reopened]
+    branches: [develop]
+
+concurrency:
+  group: ai-pr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ai-review:
+    if: contains(github.event.pull_request.labels.*.name, 'ai-review')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Collect PR context
+        id: pr
+        run: |
+          set -euo pipefail
+          pr_number="${{ github.event.pull_request.number }}"
+          repo="${{ github.repository }}"
+
+          gh pr view "$pr_number" --repo "$repo" --json title,body,baseRefName,headRefName,additions,deletions,changedFiles > pr.json
+          gh pr diff "$pr_number" --repo "$repo" --patch > pr.patch
+
+          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate AI review (OpenAI)
+        run: |
+          set -euo pipefail
+
+          node <<'NODE'
+          const fs = require('fs');
+          const https = require('https');
+
+          const pr = JSON.parse(fs.readFileSync('pr.json', 'utf8'));
+          const diff = fs.readFileSync('pr.patch', 'utf8');
+
+          const mentions = '@Crong-Gabia @HeegwonJo';
+
+          const system = [
+            'You are a senior engineer reviewing a GitHub pull request.',
+            'Return a single Markdown comment with sections:',
+            '## Summary (1-3 bullets)',
+            '## Risks (bullets, include severity: low/med/high)',
+            '## Suggestions (bullets, actionable)',
+            '## Missing Info (bullets; if anything blocks merge, prefix bullet with BLOCKED:)',
+            '',
+            'If anything is BLOCKED, end the comment with a line containing exactly:',
+            mentions,
+          ].join('\n');
+
+          const user = [
+            `PR Title: ${pr.title}`,
+            `Changed files: ${pr.changedFiles}, +${pr.additions}/-${pr.deletions}`,
+            `Base: ${pr.baseRefName}, Head: ${pr.headRefName}`,
+            '',
+            'PR Body:',
+            pr.body || '(empty)',
+            '',
+            'Diff (patch):',
+            diff.slice(0, 180000),
+          ].join('\n');
+
+          const apiKey = process.env.OPENAI_API_KEY;
+          if (!apiKey) {
+            console.error('Missing OPENAI_API_KEY');
+            process.exit(1);
+          }
+
+          const payload = JSON.stringify({
+            model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+            messages: [
+              { role: 'system', content: system },
+              { role: 'user', content: user },
+            ],
+            temperature: 0.2,
+          });
+
+          const req = https.request(
+            {
+              hostname: 'api.openai.com',
+              path: '/v1/chat/completions',
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Length': Buffer.byteLength(payload),
+              },
+            },
+            (res) => {
+              let data = '';
+              res.on('data', (c) => (data += c));
+              res.on('end', () => {
+                if (res.statusCode < 200 || res.statusCode >= 300) {
+                  console.error('OpenAI API error', res.statusCode, data);
+                  process.exit(1);
+                }
+                const json = JSON.parse(data);
+                const content = json.choices?.[0]?.message?.content;
+                if (!content) {
+                  console.error('No content from model');
+                  process.exit(1);
+                }
+                fs.writeFileSync('ai-review.md', content);
+              });
+            }
+          );
+
+          req.on('error', (e) => {
+            console.error(e);
+            process.exit(1);
+          });
+
+          req.write(payload);
+          req.end();
+          NODE
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+
+      - name: Post PR comment (single summary)
+        run: |
+          set -euo pipefail
+          pr_number="${{ steps.pr.outputs.pr_number }}"
+          repo="${{ github.repository }}"
+
+          if [ ! -s ai-review.md ]; then
+            echo "ai-review.md is empty" >&2
+            exit 1
+          fi
+
+          gh pr comment "$pr_number" --repo "$repo" --body-file ai-review.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

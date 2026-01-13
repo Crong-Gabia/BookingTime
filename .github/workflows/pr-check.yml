@@ -1,0 +1,44 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches:
+      - develop
+
+concurrency:
+  group: pr-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install
+        run: pnpm install
+
+      - name: Build (shared)
+        run: pnpm --filter shared build
+
+      - name: Build (api)
+        run: pnpm --filter api build
+
+      - name: Build (web bundling only)
+        run: pnpm --filter web exec vite build
+
+      - name: Test (web)
+        run: pnpm --filter web test -- --run
