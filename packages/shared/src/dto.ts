@@ -76,9 +76,8 @@ export interface RemindResponseDto {
 
 export interface ConfirmMeetingDto {
   requestId: string;
-  confirmedStart: string;
-  confirmedEnd: string;
-  roomId: string;
+  selectedTimeSlot: string;
+  location: string;
 }
 
 export interface ConfirmMeetingResponseDto {
@@ -110,12 +109,6 @@ export interface ErrorResponse {
 }
 
 export const ERROR_CODES = {
-  ROOM_TAKEN: 'ROOM_TAKEN',
-  VERSION_MISMATCH: 'VERSION_MISMATCH',
-  REQUEST_CLOSED: 'REQUEST_CLOSED',
-  INVALID_TIME_RANGE: 'INVALID_TIME_RANGE',
-  NO_COMMON_SLOTS: 'NO_COMMON_SLOTS',
-  PARTICIPANT_NOT_FOUND: 'PARTICIPANT_NOT_FOUND',
   ROOM_TAKEN: 'ROOM_TAKEN',
   VERSION_MISMATCH: 'VERSION_MISMATCH',
   REQUEST_CLOSED: 'REQUEST_CLOSED',

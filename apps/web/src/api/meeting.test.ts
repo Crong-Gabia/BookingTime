@@ -327,9 +327,8 @@ describe('confirmMeeting', () => {
   it('성공 시 회의 확정 결과를 반환해야 함', async () => {
     const payload = {
       requestId: 'req-123',
-      confirmedStart: '2026-01-16T10:00:00',
-      confirmedEnd: '2026-01-16T11:00:00',
-      roomId: 'room-1',
+      selectedTimeSlot: '2026-01-16T10:00:00',
+      location: 'room-1',
     };
     const mockResponse = { confirmed: true, meetingId: 'm-123' };
     (global.fetch as vi.Mock).mockResolvedValue({
@@ -346,9 +345,8 @@ describe('confirmMeeting', () => {
   it('POST 메서드로 요청해야 함', async () => {
     const payload = {
       requestId: 'req-123',
-      confirmedStart: '2026-01-16T10:00:00',
-      confirmedEnd: '2026-01-16T11:00:00',
-      roomId: 'room-1',
+      selectedTimeSlot: '2026-01-16T10:00:00',
+      location: 'room-1',
     };
     (global.fetch as vi.Mock).mockResolvedValue({
       ok: true,
@@ -357,7 +355,7 @@ describe('confirmMeeting', () => {
 
     await confirmMeeting(payload);
 
-    expect(global.fetch).toHaveBeenCalledWith('/api/meetings/confirm', {
+    expect(global.fetch).toHaveBeenCalledWith('/api/meetings/req-123/confirm', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -368,9 +366,8 @@ describe('confirmMeeting', () => {
   it('올바른 페이로드를 전송해야 함', async () => {
     const payload = {
       requestId: 'req-456',
-      confirmedStart: '2026-01-17T14:00:00',
-      confirmedEnd: '2026-01-17T15:00:00',
-      roomId: 'room-2',
+      selectedTimeSlot: '2026-01-17T14:00:00',
+      location: 'room-2',
     };
     (global.fetch as vi.Mock).mockResolvedValue({
       ok: true,
@@ -388,9 +385,8 @@ describe('confirmMeeting', () => {
   it('올바른 엔드포인트를 호출해야 함', async () => {
     const payload = {
       requestId: 'req-123',
-      confirmedStart: '2026-01-16T10:00:00',
-      confirmedEnd: '2026-01-16T11:00:00',
-      roomId: 'room-1',
+      selectedTimeSlot: '2026-01-16T10:00:00',
+      location: 'room-1',
     };
     (global.fetch as vi.Mock).mockResolvedValue({
       ok: true,
@@ -399,16 +395,15 @@ describe('confirmMeeting', () => {
 
     await confirmMeeting(payload);
 
-    expect(global.fetch).toHaveBeenCalledWith('/api/meetings/confirm', expect.any(Object));
+    expect(global.fetch).toHaveBeenCalledWith('/api/meetings/req-123/confirm', expect.any(Object));
   });
 
   // 에러 케이스: fetch 실패 시 에러를 던져야 함
   it('fetch 실패 시 에러를 던져야 함', async () => {
     const payload = {
       requestId: 'req-123',
-      confirmedStart: '2026-01-16T10:00:00',
-      confirmedEnd: '2026-01-16T11:00:00',
-      roomId: 'room-1',
+      selectedTimeSlot: '2026-01-16T10:00:00',
+      location: 'room-1',
     };
     (global.fetch as vi.Mock).mockResolvedValue({
       ok: false,

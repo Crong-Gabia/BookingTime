@@ -47,7 +47,7 @@ describe('SectionHeader', () => {
     expect(button).toBeInTheDocument();
   });
 
-  it('액션이 제공되지 않으면 렌더링하지 않아야 함', () {
+  it('액션이 제공되지 않으면 렌더링하지 않아야 함', () => {
     render(<SectionHeader title="면접 일정" />);
 
     const button = screen.queryByRole('button');

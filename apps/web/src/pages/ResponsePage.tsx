@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
+import { AppBar, Toolbar, IconButton, Typography, Box, Button } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface TimeSlotData {
   date: string;
@@ -161,166 +163,166 @@ export default function ResponsePage() {
 
   if (isSubmitted) {
     return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <h1 style={{ color: '#4caf50', marginBottom: '1rem' }}>✅ 응답 완료!</h1>
-        <p>소중한 시간을 내어주셔서 감사합니다.</p>
-        <button
-          onClick={() => navigate('/')}
-          style={{
-            marginTop: '2rem',
-            padding: '1rem 2rem',
-            backgroundColor: '#1976d2',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '1rem',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-          }}
-        >
-          홈으로 이동
-        </button>
-      </div>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <AppBar position="static" color="default" elevation={0}>
+          <Toolbar>
+            <IconButton onClick={() => navigate('/')} color="inherit">
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+              응답 완료
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+          <Typography variant="h4" sx={{ color: '#4caf50', marginBottom: '1rem' }}>
+            ✅ 응답 완료!
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            소중한 시간을 내어주셔서 감사합니다.
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/')}
+            sx={{ marginTop: '2rem' }}
+          >
+            홈으로 이동
+          </Button>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <div style={{ padding: '1rem', paddingBottom: '8rem' }}>
-      <h1 style={{ marginBottom: '0.5rem' }}>회의 일정 응답</h1>
-      <p style={{ color: '#666', marginBottom: '1.5rem' }}>
-        가능한 시간을 선택하세요 (불가능한 시간은 자동으로 표시됩니다)
-      </p>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <AppBar position="static" color="default" elevation={0}>
+        <Toolbar>
+          <IconButton onClick={() => navigate('/')} color="inherit">
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+            회의 일정 응답
+          </Typography>
+        </Toolbar>
+      </AppBar>
 
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-          이름 *
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="홍길동"
-          disabled={isSubmitting}
-          style={{
-            width: '100%',
-            padding: '0.75rem',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            fontSize: '1rem',
-          }}
-        />
-      </div>
+      <Box sx={{ padding: '1rem', paddingBottom: '8rem', flex: 1 }}>
+        <Typography variant="h4" gutterBottom fontWeight={600}>
+          회의 일정 응답
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ marginBottom: '1.5rem' }}>
+          가능한 시간을 선택하세요 (불가능한 시간은 자동으로 표시됩니다)
+        </Typography>
 
-      {timeSlotData.map((dateSlot) => (
-        <div key={dateSlot.date} style={{ marginBottom: '1.5rem' }}>
-          <div
+        <Box sx={{ marginBottom: '1.5rem' }}>
+          <Typography sx={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            이름 *
+          </Typography>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="홍길동"
+            disabled={isSubmitting}
             style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '0.5rem',
+              width: '100%',
+              padding: '0.75rem',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              fontSize: '1rem',
             }}
-          >
-            <h3 style={{ margin: 0 }}>
-              {new Date(dateSlot.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric', weekday: 'long' })}
-            </h3>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button
-                onClick={() => handleSetAllAvailable(dateSlot.date)}
-                disabled={isSubmitting}
-                style={{
-                  padding: '0.25rem 0.5rem',
-                  backgroundColor: '#4caf50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  fontSize: '0.875rem',
-                }}
-              >
-                전체 가능
-              </button>
-              <button
-                onClick={() => handleSetAllUnavailable(dateSlot.date)}
-                disabled={isSubmitting}
-                style={{
-                  padding: '0.25rem 0.5rem',
-                  backgroundColor: '#f44336',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  fontSize: '0.875rem',
-                }}
-              >
-                전체 불가
-              </button>
-            </div>
-          </div>
+          />
+        </Box>
 
-          <div style={{ display: 'grid', gap: '0.5rem', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))' }}>
-            {dateSlot.slots.map((time) => {
-              const isAvailable = isSlotAvailable(dateSlot.date, time);
-              const isUnavailable = !isAvailable;
-              const isBlocked = isBlockedSlot(dateSlot.date, time);
-
-              return (
-                <button
-                  key={time}
-                  disabled={isBlocked || isSubmitting}
-                  onClick={() => !isBlocked && toggleSlot(dateSlot.date, time)}
-                  style={{
-                    padding: '0.75rem',
-                    border: isAvailable ? '3px solid #4caf50' : isUnavailable ? '3px solid #f44336' : '2px solid #e0e0e0',
-                    borderRadius: '8px',
-                    backgroundColor: isAvailable ? '#e8f5e9' : isUnavailable ? '#ffebee' : 'white',
-                    color: isAvailable ? '#2e7d32' : isUnavailable ? '#c62828' : '#333',
-                    fontWeight: 'bold',
-                    cursor: isBlocked || isSubmitting ? 'not-allowed' : 'pointer',
-                    opacity: isBlocked ? 0.4 : 1,
-                    fontSize: '0.875rem',
-                  }}
+        {timeSlotData.map((dateSlot) => (
+          <Box key={dateSlot.date} sx={{ marginBottom: '1.5rem' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '0.5rem',
+              }}
+            >
+              <Typography variant="h6" gutterBottom sx={{ margin: 0 }}>
+                {new Date(dateSlot.date).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric', weekday: 'long' })}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: '0.5rem' }}>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="success"
+                  onClick={() => handleSetAllAvailable(dateSlot.date)}
+                  disabled={isSubmitting}
                 >
-                  {time}
-                  {isBlocked && '(점심/주말)'}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+                  전체 가능
+                </Button>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="error"
+                  onClick={() => handleSetAllUnavailable(dateSlot.date)}
+                  disabled={isSubmitting}
+                >
+                  전체 불가
+                </Button>
+              </Box>
+            </Box>
 
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: '1rem',
-          backgroundColor: 'white',
-          boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
-          textAlign: 'center',
-        }}
-      >
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting || (availableSlots.size === 0 && unavailableSlots.size === 0)}
-          style={{
-            width: '100%',
+            <Box sx={{ display: 'grid', gap: '0.5rem', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))' }}>
+              {dateSlot.slots.map((time) => {
+                const isAvailable = isSlotAvailable(dateSlot.date, time);
+                const isUnavailable = !isAvailable;
+                const isBlocked = isBlockedSlot(dateSlot.date, time);
+
+                return (
+                  <Button
+                    key={time}
+                    disabled={isBlocked || isSubmitting}
+                    onClick={() => !isBlocked && toggleSlot(dateSlot.date, time)}
+                    variant={isAvailable ? 'contained' : isUnavailable ? 'contained' : 'outlined'}
+                    sx={{
+                      padding: '0.75rem',
+                      border: isAvailable ? '3px solid #4caf50' : isUnavailable ? '3px solid #f44336' : '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      backgroundColor: isAvailable ? '#e8f5e9' : isUnavailable ? '#ffebee' : 'white',
+                      color: isAvailable ? '#2e7d32' : isUnavailable ? '#c62828' : '#333',
+                      fontWeight: 'bold',
+                      opacity: isBlocked ? 0.4 : 1,
+                      fontSize: '0.875rem',
+                    }}
+                  >
+                    {time}
+                  </Button>
+                );
+              })}
+            </Box>
+          </Box>
+        ))}
+
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
             padding: '1rem',
-            backgroundColor: '#1976d2',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '1.1rem',
-            cursor: isSubmitting || (availableSlots.size === 0 && unavailableSlots.size === 0) ? 'not-allowed' : 'pointer',
-            opacity: isSubmitting || (availableSlots.size === 0 && unavailableSlots.size === 0) ? 0.7 : 1,
-            fontWeight: 'bold',
+            backgroundColor: 'white',
+            boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+            textAlign: 'center',
           }}
         >
-          {isSubmitting ? '제출 중...' : `제출하기 (${availableSlots.size}개 선택)`}
-        </button>
-      </div>
-    </div>
+          <Button
+            variant="contained"
+            fullWidth
+            size="large"
+            onClick={handleSubmit}
+            disabled={isSubmitting || (availableSlots.size === 0 && unavailableSlots.size === 0)}
+          >
+            {isSubmitting ? '제출 중...' : `제출하기 (${availableSlots.size}개 선택)`}
+          </Button>
+        </Box>
+      </Box>
+    </Box>
   );
 }
