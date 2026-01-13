@@ -31,11 +31,14 @@ jobs:
       - name: Install
         run: pnpm install
 
+      - name: Build (shared)
+        run: pnpm --filter shared build
+
       - name: Build (api)
         run: pnpm --filter api build
 
-      - name: Build (web)
-        run: pnpm --filter web build
+      - name: Build (web bundling only)
+        run: pnpm --filter web exec vite build
 
       - name: Test (web)
         run: pnpm --filter web test -- --run
