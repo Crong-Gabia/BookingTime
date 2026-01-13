@@ -30,6 +30,11 @@
 - Vitest + React Testing Library 설정
 - 컴포넌트/훅/API 래퍼 테스트 방법, 예시
 
+### 7. 에이전트 작업 운영 규칙 ([07-agent-workflow.md](./07-agent-workflow.md))
+- PR 단위 작업/한글 제목 규칙
+- 추가 입력 필요 시 GitHub 이슈 멘션으로 알림
+- PR 자동 검증 + AI 리뷰 사용법
+
 ---
 
 ## 사용법
