@@ -2,6 +2,35 @@
 
 이 문서는 모든 프로젝트에 적용 가능한 제너럴 지침입니다.
 
+## Setup
+
+### 필수 도구 설치
+
+**GitHub CLI (gh)**
+```bash
+# macOS
+brew install gh
+
+# 인증
+gh auth login
+```
+
+**OpenCode (회사 AI 코딩 어시스턴트)**
+```bash
+# 설치
+curl -fsSL https://opencode.ai/install | bash
+
+# 인증 (SSL 오류 발생 시 Troubleshooting 참조)
+opencode auth login
+```
+
+### 개발자 환경 설정
+
+- **IDE**: WebStorm 또는 VS Code 권장
+- **터미널**: zsh 또는 bash
+- **Node.js**: 프로젝트 요구사항에 따라 설치 (nvm 또는 brew 사용)
+- **패키지 매니저**: 프로젝트별 지침에 따름 (pnpm, npm, yarn)
+
 ## Git Workflow
 
 ### 브랜치 전략
