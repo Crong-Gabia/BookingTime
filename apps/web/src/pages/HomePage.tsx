@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAllMeetings, type Meeting } from '../api/client';
 import { useNavigate } from 'react-router-dom';
-import { Container, Typography, Grid, Box } from '@mui/material';
+import { Container, Typography, Grid, Box, Button } from '@mui/material';
 import MeetingCard from '@/components/meeting-card';
 import FloatingButton from '@/components/floating-button';
 import { checkHealth } from '@/api';
@@ -57,32 +57,26 @@ export default function HomePage() {
       {healthData && (
       <Box sx={{ mb: 4 }}>
         <Typography variant="h6" fontWeight={600}>
-          대시보드
+          빠른 시작
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
             variant="contained"
-            onClick={() => navigate('/dashboard')}
-            sx={{ mr: 1 }}
-          >
-            대시보드로 이동
-          </Button>
-          <Button
-            variant="outlined"
             onClick={() => navigate('/requests/new')}
+            startIcon={<span>+</span>}
           >
-            새 일정
+            새 회의 일정 만들기
           </Button>
         </Box>
       </Box>
       )}
 
       <Typography variant="h6" gutterBottom fontWeight={600}>
-        진행 중인 조율
+        진행 중인 회의
       </Typography>
       {activeMeetings.length === 0 ? (
         <Typography color="text.secondary" sx={{ mb: 4 }}>
-          진행 중인 조율이 없습니다.
+          진행 중인 회의가 없습니다.
         </Typography>
       ) : (
         <Grid container spacing={2} sx={{ mb: 4 }}>
@@ -102,11 +96,11 @@ export default function HomePage() {
       )}
 
       <Typography variant="h6" gutterBottom fontWeight={600}>
-        완료된 조율
+        완료된 회의
       </Typography>
       {completedMeetings.length === 0 ? (
         <Typography color="text.secondary">
-          완료된 조율이 없습니다.
+          완료된 회의가 없습니다.
         </Typography>
       ) : (
         <Grid container spacing={2}>

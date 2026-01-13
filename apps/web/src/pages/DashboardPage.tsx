@@ -7,7 +7,7 @@ import ParticipantList from '@/components/participant-list';
 import CommonSlots from '@/components/common-slots';
 import RoomSelector from '@/components/room-selector';
 import SectionHeader from '@/components/section-header';
-import { Container, Grid, Box, Button, Typography, Alert, AppBar, Toolbar, IconButton, Chip, Paper } from '@mui/material';
+import { Container, Grid, Box, Button, Typography, AppBar, Toolbar, IconButton, Chip, Paper } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ShareIcon from '@mui/icons-material/Share';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -79,7 +79,7 @@ export default function DashboardPage() {
     confirmMutation.mutate({
       requestId: id,
       selectedTimeSlot,
-      location: mockRooms.find(r => r.id === selectedRoomId)?.name || undefined,
+      location: mockRooms.find(r => r.id === selectedRoomId)?.name || '',
     });
   };
 
