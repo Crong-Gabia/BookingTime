@@ -79,7 +79,7 @@ export class MeetingService {
 
     const groupedByDate: Record<string, string[]> = {};
     for (const slotIso of commonSlots) {
-      const dateKey = slotIso.split('T')[0] ?? slotIso;
+      const dateKey = slotIso.split('T')[0];
       groupedByDate[dateKey] ??= [];
       groupedByDate[dateKey].push(slotIso);
     }
@@ -98,7 +98,7 @@ export class MeetingService {
       participants: request.participants.map((p) => ({
         userId: p.userId,
         name: p.name,
-        department: '',
+        department: null,
         responded: p.responded,
       })),
       commonAvailableSlots,

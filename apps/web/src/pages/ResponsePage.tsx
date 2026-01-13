@@ -35,18 +35,14 @@ export default function ResponsePage() {
     queryFn: async () => {
       const response = await fetch(`/api/meetings/${id}/dashboard`);
       if (!response.ok) {
-        type ErrorBody = { message?: unknown };
-        const message = await response
-          .json()
-          .then((body: unknown) => {
-            if (body && typeof body === 'object' && 'message' in body) {
-              const maybeMessage = (body as ErrorBody).message;
-              return typeof maybeMessage === 'string' ? maybeMessage : null;
-            }
-            return null;
-          })
-          .catch(() => null);
-        throw new Error(message ?? 'Failed to load dashboard');
+        let message = 'Failed to load dashboard';
+        try {
+          const errorBody = await response.json();
+          if (errorBody?.message && typeof errorBody.message === 'string') {
+            message = errorBody.message;
+          }
+        } catch {}
+        throw new Error(message);
       }
       return response.json() as Promise<{
         requestId: string;
@@ -214,8 +210,14 @@ export default function ResponsePage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to submit');
+        let message = 'Failed to submit';
+        try {
+          const errorBody = await response.json();
+          if (errorBody?.message && typeof errorBody.message === 'string') {
+            message = errorBody.message;
+          }
+        } catch {}
+        throw new Error(message);
       }
 
       return response.json();
