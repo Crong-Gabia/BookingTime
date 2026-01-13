@@ -1,118 +1,136 @@
-# 저장소 가이드라인
+# 개발 가이드라인 (General)
 
-## 프로젝트 개요
-NestJS 백엔드, React + MUI 프론트엔드, PostgreSQL 데이터베이스로 구성된 회의 예약 시스템입니다. Monorepo(pnpm + Turborepo)로 관리됩니다.
+이 문서는 모든 프로젝트에 적용 가능한 제너럴 지침입니다.
 
-## 언어 및 작업 기록
+## Git Workflow
 
-### 언어 정책
-- **한국어 사용**: 모든 답변과 문서는 한국어로 작성합니다.
-- 코드 내 주석도 한국어를 우선시합니다.
+### 브랜치 전략
+- **기준 브랜치**: `develop` (최종 병합 목표)
+- **기능 브랜치**: `feature/기능명` 형태
+- **절대 main에 직접 push 금지**
 
-### 작업 기록 (Work History)
-- **위치**: `work-history/` 디렉토리
-- **형식**: `YYYY-MM-DD-{작업-제목}.md`
-- **기록 내용**:
-  - 수행한 작업 목록
-  - 의사결정 사항
-  - 발생한 이슈 및 해결 방법
-  - 다음 단계 계획
-- **규칙**: 모든 작업을 완료한 후 즉시 기록 업데이트
-
-## Commands
+### 작업 흐름
 
 ```bash
-# Install
-pnpm install
+# 1. develop 브랜치에서 최신 상태 확인
+git checkout develop
+git pull origin develop
 
-# Development
-pnpm run dev                    # All apps (turbo)
-pnpm --filter api dev           # Backend only
-pnpm --filter web dev           # Frontend only
+# 2. 기능 브랜치 생성 (kebab-case)
+git checkout -b feature/회의실-예약-기능
 
-# Testing
-pnpm test                       # All tests
-pnpm test -- <file-path>        # Specific file (Jest/Vitest)
-pnpm test -t "test name"        # Specific test name
-pnpm --filter api test          # Backend (Jest, *.spec.ts)
-pnpm --filter web test          # Frontend (Vitest, *.test.ts)
+# 3. 작업 및 커밋
+git add .
+git commit -m "feat: 회의실 예약 기능 구현"
 
-# Lint/Format
-pnpm run lint                   # ESLint all packages
-pnpm run lint:fix               # Auto-fix ESLint
-pnpm run format                 # Prettier check
-pnpm run format:fix             # Auto-format
+# 4. 원격에 브랜치 푸시
+git push -u origin feature/회의실-예약-기능
 
-# Database
-pnpm --filter api db:migrate:dev
-pnpm --filter api db:seed
+# 5. PR 생성 (develop로)
+gh pr create --base develop --title "feat: 회의실 예약 기능" --body "$(cat <<'EOF'
+## 변경 내용
+- 회의실 예약 기능 구현
+- 슬롯 선택 컴포넌트 추가
+- API 엔드포인트 추가
 
-# Build
-pnpm run build                  # All packages
+## 검증 방법
+- 회의실 선택 가능
+- 시간 슬롯 선택 가능
+- 예약 제출 정상 동작
+EOF
+)"
+
+# 6. 사용자 검증 후 병합 (Review 후)
+# PR 머지 시 "Squash and merge" 사용 권장
+
+# 7. 병합 후 로컬 동기화 및 브랜치 삭제
+git checkout develop
+git pull origin develop
+git branch -d feature/회의실-예약-기능
+git push origin --delete feature/회의실-예약-기능
 ```
 
+### 커밋 메시지 규칙 (Conventional Commits)
+```
+feat: 새로운 기능 추가
+fix: 버그 수정
+refactor: 코드 리팩토링
+docs: 문서 수정
+test: 테스트 코드 추가/수정
+chore: 빌드/설정 관련 작업
+```
+
+### PR 작성 가이드
+- **Base**: 항상 `develop` 브랜치
+- **Title**: `[type]: 간단한 설명` 형태
+- **Body**:
+  - 변경 내용 요약
+  - 검증 방법/테스트 방법
+  - 관련 이슈 번호 (있는 경우)
+- **Merge**: Squash and merge 권장
+
+### 금지 사항
+- `main` 브랜치에 직접 커밋/푸시 금지
+- 기능 단위로 브랜치 분리하지 않고 작업 금지
+- PR 없이 바로 병합 금지
+- 커밋 메시지 규칙 위반 금지
+
 ## Code Style
+
+### Naming Conventions
+
+#### TypeScript/JavaScript
+- **변수/함수**: `snake_case` (회사 컨벤션)
+  ```typescript
+  const user_id = 123;
+  const user_name = 'John';
+  function create_user() {}
+  ```
+
+- **클래스/인터페이스/타입**: `PascalCase`
+  ```typescript
+  class UserController {}
+  interface IUserRequest {}
+  type UserRole = 'admin' | 'user';
+  ```
+
+- **상수**: `SCREAMING_SNAKE_CASE`
+  ```typescript
+  const ERROR_CODES = { ... };
+  const API_BASE_URL = 'https://api.example.com';
+  ```
+
+- **파일명**: `kebab-case`
+  ```
+  user.controller.ts
+  user.service.ts
+  button.component.tsx
+  ```
+
+- **테스트 파일**: `*.spec.ts` (backend), `*.test.ts` (frontend)
 
 ### Formatting (Prettier)
 - 2 spaces, semicolons required
 - Single quotes (`'`), double quotes only for JSX
 - Print width: 100, trailing commas: all, arrow parens: always
 
-### Naming
-- Files: `kebab-case` - `meeting.service.ts`, `slot-selector.tsx`
-- Classes/Interfaces/Types: `PascalCase` - `MeetingController`, `IRoomAdapter`
-- Functions/Variables: `camelCase` - `createRequest`, `userId`
-- Constants: `SCREAMING_SNAKE_CASE` - `ERROR_CODES`
-- Test files: `*.spec.ts` (backend), `*.test.ts` (frontend)
-
 ### Imports
 ```typescript
 // Order: 1. External libs, 2. @shared/*, 3. Relative
 import { Controller, Get } from '@nestjs/common';
-import { CreateMeetingRequestDto } from '@shared/dto';
-import { MeetingService } from './meeting.service';
+import { CreateUserDto } from '@shared/dto';
+import { UserService } from './user.service';
 ```
 
 ### Type Safety
 - Strict mode enabled
-- `@typescript-eslint/no-explicit-any: error` (all packages)
-- Never suppress type errors
-
-## Architecture
-
-### Backend (NestJS)
-- Prisma ORM with PostgreSQL
-- Adapter pattern for external services (Room, Holiday, HR)
-- Optimistic locking with `version` column
-- Return error codes: `ROOM_TAKEN`, `VERSION_MISMATCH`, etc.
-
-### Frontend (React)
-- MUI (Material UI) components
-- TanStack Query for data fetching
-- React Router for navigation
-- Display in KST, store/return UTC
-
-### Time Handling
-- Database: UTC (`timestamptz`)
-- API: ISO 8601 strings
-- UI: KST (Asia/Seoul), user input in local time
-- Slots: 30-min intervals, 09:00-18:00, exclude 12:00-13:00 (lunch) and weekends
-
-### Error Handling
-```typescript
-// Backend
-throw new BadRequestException(ERROR_CODES.ROOM_TAKEN, 'Meeting room already booked');
-
-// Frontend
-if (error.code === ERROR_CODES.ROOM_TAKEN) {
-  showError('이미 예약된 회의실입니다');
-}
-```
+- Never suppress type errors (`as any`, `@ts-ignore`, `@ts-expect-error` 금지)
+- TypeScript ESLint `no-explicit-any` rule error 레벨
 
 ## Testing
 
 ### Patterns
-- Co-locate tests: `health.controller.spec.ts`, `meeting.service.test.ts`
+- Co-locate tests: `user.controller.spec.ts`, `user.service.test.ts`
 - Use table-driven tests for edge cases
 - Mock external adapters/services
 
@@ -122,42 +140,38 @@ if (error.code === ERROR_CODES.ROOM_TAKEN) {
 - Test one behavior per case
 - Target ≥80% coverage on business logic
 
-## Database
-
-### Prisma Schema
-- Models: meeting_requests, participants, time_slots, confirmed_meetings, notifications
-- Indexes: status, createdAt, requestId, userId
-- Unique constraints: requestId + userId (participants)
-- Soft delete: `deletedAt` column
-
-### Transactions
-- Use Prisma transactions for multi-step operations
-- Wrap slot updates and meeting confirmation
-- Validate state transitions inside transactions
-
 ## Configuration
 
 ### Environment Variables
-- Backend: `DATABASE_URL`, optional `REDIS_URL`, `JWT_SECRET`, `PORT=3000`
-- Frontend: `VITE_API_BASE_URL`
-- Never commit secrets - use `.env.local`
+- 개발환경: `.env.local` (`.gitignore` 포함)
+- 프로덕션: 서비스 설정/시크릿 매니저 사용
+- 절대 `.env`, `.env.local` 파일 커밋 금지
 
 ### Path Aliases
 ```typescript
-// Backend
-@shared/* → ../../packages/shared/src
+// 패키지별 설정에 따라 사용
+@shared/* → 공유 패키지
+@/* → 소스 코드 내부
+```
 
-// Frontend
-@/* → ./src/*
-@shared/* → ../../packages/shared/src/*
+## Error Handling
+```typescript
+// 에러 코드 정의 (상수)
+const ERROR_CODES = {
+  ROOM_TAKEN: 'ROOM_TAKEN',
+  VERSION_MISMATCH: 'VERSION_MISMATCH',
+} as const;
+
+// 사용
+throw new BadRequestException(ERROR_CODES.ROOM_TAKEN, 'Meeting room already booked');
+
+// 프론트엔드에서 처리
+if (error.code === ERROR_CODES.ROOM_TAKEN) {
+  showError('이미 예약된 회의실입니다');
+}
 ```
 
 ## Troubleshooting
-
-- **Timezone issues**: Verify DB=UTC, API=ISO, UI=KST
-- **Concurrent conflicts**: Check `version` column in optimistic locking
-- **Build failures**: Run `pnpm install` first
-- **Lint errors**: Run `pnpm run lint:fix` before committing
 
 ### OpenCode 인증 SSL 오류
 
