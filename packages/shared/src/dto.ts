@@ -1,4 +1,4 @@
-기보export enum MeetingRequestStatus {
+export enum MeetingRequestStatus {
   DRAFT = 'DRAFT',
   OPEN = 'OPEN',
   CONFIRMED = 'CONFIRMED',

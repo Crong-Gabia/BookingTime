@@ -5,7 +5,8 @@
     "rootDir": "./src",
     "baseUrl": "./",
     "paths": {
-      "@shared/*": ["../../packages/shared/dist"]
+      "@shared/*": ["../../packages/shared/dist"],
+      "@shared/dto": ["../../packages/shared/dist/dto"]
     }
   },
   "references": [
