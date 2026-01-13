@@ -158,3 +158,34 @@ if (error.code === ERROR_CODES.ROOM_TAKEN) {
 - **Concurrent conflicts**: Check `version` column in optimistic locking
 - **Build failures**: Run `pnpm install` first
 - **Lint errors**: Run `pnpm run lint:fix` before committing
+
+### OpenCode 인증 SSL 오류
+
+회사 네트워크 환경에서 `opencode auth login` 실행 시 `self signed certificate in certificate chain` 오류가 발생할 수 있습니다.
+
+**증상**:
+```
+ERROR self signed certificate in certificate chain Failed to fetch models.dev
+ERROR self signed certificate in certificate chain fatal
+```
+
+**해결 방법**:
+
+1. **임시 해결 (세션 동안만)**
+   ```bash
+   NODE_TLS_REJECT_UNAUTHORIZED=0 opencode auth login
+   ```
+   - 빠르게 인증이 필요할 때 사용
+   - 보안 우려로 개발 세션 종료 후 환경 변수 제거 권장
+
+2. **영구적 해결 (권장)**
+   - 회사 CA 인증서 경로를 찾아 환경 변수 설정
+   ```bash
+   # ~/.zshrc 또는 ~/.bashrc에 추가
+   export NODE_EXTRA_CA_CERTS=/path/to/company-ca-certificate.pem
+   ```
+   - 인증서 경로는 IT팀에 문의하거나 시스템 설정에서 확인
+
+3. **대안**
+   - IT팀에 OpenCode가 외부 인증 서버와 통신할 수 있도록 프록시/방화벽 설정 요청
+   - 로그 위치: `~/.local/share/opencode/log/`
