@@ -13,6 +13,7 @@ export enum TimeSlotStatus {
 
 export interface CreateMeetingRequestDto {
   title: string;
+  description?: string;
   organizerId: string;
   participantIds: string[];
   requiredParticipantIds: string[];
@@ -44,15 +45,28 @@ export interface CreateParticipantResponseDto {
 export interface DashboardDto {
   requestId: string;
   title: string;
+  description?: string;
   status: MeetingRequestStatus;
-  participants: {
+  participants: Array<{
     userId: string;
     name: string;
+    department: string;
     responded: boolean;
-  }[];
-  commonAvailableSlots: string[];
+  }>;
+  commonAvailableSlots: Array<{
+    date: string;
+    times: string[];
+  }>;
   createdAt: string;
-  closedAt?: string;
+  startDate: string;
+  endDate: string;
+  durationMinutes: number;
+}
+
+export interface CreateMeetingResponse {
+  requestId: string;
+  meetingUrl: string;
+  responseUrl: string;
 }
 
 export interface RemindResponseDto {
@@ -62,8 +76,9 @@ export interface RemindResponseDto {
 
 export interface ConfirmMeetingDto {
   requestId: string;
-  selectedTimeSlot: string;
-  location?: string;
+  confirmedStart: string;
+  confirmedEnd: string;
+  roomId: string;
 }
 
 export interface ConfirmMeetingResponseDto {
@@ -74,6 +89,20 @@ export interface ConfirmMeetingResponseDto {
   confirmedAt: string;
 }
 
+export interface SubmitResponseDto {
+  requestId: string;
+  userId: string;
+  name: string;
+  availableSlots: string[];
+  unavailableSlots: string[];
+}
+
+export interface HealthResponse {
+  status: string;
+  timestamp: string;
+  uptime: number;
+}
+
 export interface ErrorResponse {
   code: string;
   message: string;
@@ -81,6 +110,12 @@ export interface ErrorResponse {
 }
 
 export const ERROR_CODES = {
+  ROOM_TAKEN: 'ROOM_TAKEN',
+  VERSION_MISMATCH: 'VERSION_MISMATCH',
+  REQUEST_CLOSED: 'REQUEST_CLOSED',
+  INVALID_TIME_RANGE: 'INVALID_TIME_RANGE',
+  NO_COMMON_SLOTS: 'NO_COMMON_SLOTS',
+  PARTICIPANT_NOT_FOUND: 'PARTICIPANT_NOT_FOUND',
   ROOM_TAKEN: 'ROOM_TAKEN',
   VERSION_MISMATCH: 'VERSION_MISMATCH',
   REQUEST_CLOSED: 'REQUEST_CLOSED',

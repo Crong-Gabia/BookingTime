@@ -1,53 +1,21 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ConfirmMeetingDto } from '@shared/dto';
+import { confirmMeeting, fetchDashboard, sendReminder } from '@/api';
+import ParticipantList from '@/components/participant-list';
+import CommonSlots from '@/components/common-slots';
+import RoomSelector from '@/components/room-selector';
+import SectionHeader from '@/components/section-header';
+import { Container, Grid, Box, Button, Typography, Alert } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ShareIcon from '@mui/icons-material/Share';
 
-interface DashboardData {
-  requestId: string;
-  title: string;
-  status: string;
-  participants: Array<{ userId: string; name: string; responded: boolean; }>;
-  commonAvailableSlots: string[];
-  createdAt: string;
-  durationMinutes: number;
-}
-
-interface ConfirmMeetingDto {
-  requestId: string;
-  selectedTimeSlot: string;
-  location?: string;
-}
-
-async function fetchDashboard(requestId: string): Promise<DashboardData> {
-  const response = await fetch(`/api/meetings/${requestId}/dashboard`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch dashboard');
-  }
-  return response.json();
-}
-
-async function sendRemind(requestId: string, userId: string): Promise<{ userId: string; sent: boolean; }> {
-  const response = await fetch(`/api/meetings/${requestId}/remind/${userId}`, {
-    method: 'POST',
-  });
-  if (!response.ok) {
-    throw new Error('Failed to send reminder');
-  }
-  return response.json();
-}
-
-async function confirmMeeting(dto: ConfirmMeetingDto) {
-  const response = await fetch('/api/meetings/confirm', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dto),
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to confirm meeting');
-  }
-  return response.json();
-}
+const mockRooms = [
+  { id: '1', name: '1층 회의실 A', capacity: 10 },
+  { id: '2', name: '1층 회의실 B', capacity: 8 },
+  { id: '3', name: '2층 대회의실', capacity: 20 },
+];
 
 export default function DashboardPage() {
   const { id } = useParams();
@@ -61,10 +29,10 @@ export default function DashboardPage() {
   });
 
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
 
   const remindMutation = useMutation({
-    mutationFn: (userId: string) => sendRemind(id || '', userId),
+    mutationFn: (userId: string) => sendReminder(id || '', userId),
     onSuccess: (result) => {
       if (result.sent) {
         alert('독촉 알림을 보냈습니다.');
@@ -90,6 +58,10 @@ export default function DashboardPage() {
   });
 
   const handleRemind = (userId: string) => {
+    if (!id) {
+      return;
+    }
+
     remindMutation.mutate(userId);
   };
 
@@ -99,10 +71,14 @@ export default function DashboardPage() {
       return;
     }
 
+    if (!id) {
+      return;
+    }
+
     confirmMutation.mutate({
-      requestId: id || '',
+      requestId: id,
       selectedTimeSlot,
-      location: selectedLocation || undefined,
+      location: mockRooms.find(r => r.id === selectedRoomId)?.name || undefined,
     });
   };
 
@@ -129,8 +105,18 @@ export default function DashboardPage() {
     }
   };
 
-  if (isLoading) return <div style={{ padding: '2rem' }}>로딩 중...</div>;
-  if (error) return <div style={{ padding: '2rem', color: 'red' }}>에러 발생</div>;
+  if (isLoading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <Typography>로딩 중...</Typography>
+    </Box>
+  );
+  
+  if (error) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+      <Typography color="error">에러 발생</Typography>
+    </Box>
+  );
+  
   if (!data) return null;
 
   const responseRate = data.participants.length > 0
@@ -139,180 +125,98 @@ export default function DashboardPage() {
   const respondedCount = data.participants.filter((p) => p.responded).length;
   const totalCount = data.participants.length;
 
+  const participants = data.participants.map(p => ({
+    id: p.userId,
+    name: p.name,
+    department: '팀',
+    status: p.responded ? 'responded' as const : 'pending' as const,
+  }));
+
+  const commonSlots = data.commonAvailableSlots.map(slot => {
+    const date = new Date(slot);
+    return {
+      date: date.toISOString().split('T')[0],
+      times: [slot],
+    };
+  });
+
   return (
-    <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
-      <h1 style={{ marginBottom: '1rem' }}>{data.title}</h1>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <SectionHeader title={data.title} subtitle="주최자 대시보드" />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-        <div style={{ backgroundColor: '#f5f5f5', padding: '1.5rem', borderRadius: '8px' }}>
-          <h2 style={{ marginTop: 0 }}>응답 현황</h2>
-          <div style={{ marginBottom: '1rem' }}>
-            <strong>응답률:</strong> {respondedCount}/{totalCount} ({responseRate}%)
-          </div>
-          <ul style={{ listStyle: 'none', padding: 0, maxHeight: '400px', overflowY: 'auto' }}>
-            {data.participants.map((participant) => (
-              <li
-                key={participant.userId}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '0.75rem',
-                  borderBottom: '1px solid #e0e0e0',
-                  backgroundColor: 'white',
-                  marginBottom: '0.5rem',
-                  borderRadius: '4px',
-                }}
-              >
-                <div>
-                  <strong>{participant.name}</strong>
-                  <span style={{ marginLeft: '0.5rem', color: '#666' }}>
-                    ({participant.userId})
-                  </span>
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  {participant.responded ? (
-                    <span style={{ color: '#4caf50', fontWeight: 'bold' }}>✅ 응답 완료</span>
-                  ) : (
-                    <>
-                      <span style={{ color: '#f44336' }}>⏳ 대기 중</span>
-                      <button
-                        onClick={() => handleRemind(participant.userId)}
-                        style={{
-                          padding: '0.25rem 0.5rem',
-                          backgroundColor: '#2196f3',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        독촉
-                      </button>
-                    </>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          <div style={{ marginTop: '1rem' }}>
-            <strong>공유:</strong>
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-              <button
-                onClick={handleCopyLink}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#1976d2',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                링크 복사
-              </button>
-              <button
-                onClick={handleShare}
-                style={{
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#2196f3',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                공유
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ backgroundColor: '#e3f2fd', padding: '1.5rem', borderRadius: '8px' }}>
-          <h2 style={{ marginTop: 0 }}>공통 가능 시간</h2>
-          {data.commonAvailableSlots.length === 0 ? (
-            <p style={{ color: '#666' }}>
-              아직 모든 참석자가 응답하지 않았거나 가능한 시간이 없습니다.
-            </p>
-          ) : (
-            <>
-              <div style={{ marginBottom: '1rem' }}>
-                <p style={{ marginTop: 0, marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
-                  ※ {data.durationMinutes}분 동안 가능한 시간만 표시됩니다.
-                </p>
-              </div>
-              <ul style={{ listStyle: 'none', padding: 0, maxHeight: '400px', overflowY: 'auto' }}>
-                {data.commonAvailableSlots.map((slot) => (
-                  <li
-                    key={slot}
-                    onClick={() => setSelectedTimeSlot(slot)}
-                    style={{
-                      padding: '0.75rem',
-                      backgroundColor: selectedTimeSlot === slot ? '#1976d2' : 'white',
-                      border: selectedTimeSlot === slot ? '2px solid #1976d2' : '1px solid #ddd',
-                      borderRadius: '4px',
-                      marginBottom: '0.5rem',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    <div style={{ fontWeight: selectedTimeSlot === slot ? 'bold' : 'normal' }}>
-                      {new Date(slot).toLocaleString('ko-KR', {
-                        month: 'numeric',
-                        day: 'numeric',
-                        weekday: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-
-              <div style={{ marginTop: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                  회의실 선택 (선택사항)
-                </label>
-                <input
-                  type="text"
-                  value={selectedLocation}
-                  onChange={(e) => setSelectedLocation(e.target.value)}
-                  placeholder="예: 1층 회의실 A"
-                  style={{
-                    width: '100%',
-                    padding: '0.5rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    fontSize: '1rem',
-                  }}
-                />
-
-                <button
-                  onClick={handleConfirm}
-                  disabled={confirmMutation.isPending || !selectedTimeSlot}
-                  style={{
-                    width: '100%',
-                    marginTop: '1rem',
-                    padding: '1rem',
-                    backgroundColor: '#4caf50',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '1.1rem',
-                    cursor: confirmMutation.isPending || !selectedTimeSlot ? 'not-allowed' : 'pointer',
-                    opacity: confirmMutation.isPending || !selectedTimeSlot ? 0.7 : 1,
-                    fontWeight: 'bold',
-                  }}
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Box sx={{ backgroundColor: 'grey.50', p: 3, borderRadius: 2 }}>
+            <Typography variant="subtitle1" gutterBottom fontWeight={600}>
+              응답 현황 ({respondedCount}/{totalCount}, {responseRate}%)
+            </Typography>
+            <ParticipantList
+              participants={participants}
+              onRemind={handleRemind}
+            />
+            
+            <Box sx={{ mt: 3 }}>
+              <Typography variant="subtitle2" gutterBottom fontWeight={600}>
+                링크 공유
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<ContentCopyIcon />}
+                  onClick={handleCopyLink}
                 >
-                  {confirmMutation.isPending ? '확정 중...' : '최종 확정'}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+                  링크 복사
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<ShareIcon />}
+                  onClick={handleShare}
+                >
+                  공유
+                </Button>
+              </Box>
+            </Box>
+          </Box>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Box sx={{ backgroundColor: 'primary.light', p: 3, borderRadius: 2 }}>
+            <SectionHeader title="공통 가능 시간" subtitle="시간을 선택하고 확정하세요" />
+            
+            {commonSlots.length === 0 ? (
+              <Alert severity="info" sx={{ mt: 2 }}>
+                아직 모든 참석자가 응답하지 않았거나 가능한 시간이 없습니다.
+              </Alert>
+            ) : (
+              <>
+                <CommonSlots
+                  slots={commonSlots}
+                  onSelectSlot={(date, time) => setSelectedTimeSlot(time)}
+                />
+                
+                <Box sx={{ mt: 3 }}>
+                  <RoomSelector
+                    rooms={mockRooms}
+                    selectedRoomId={selectedRoomId}
+                    onChange={setSelectedRoomId}
+                  />
+                  
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    onClick={handleConfirm}
+                    disabled={confirmMutation.isPending || !selectedTimeSlot}
+                    sx={{ mt: 2, py: 1.5 }}
+                  >
+                    {confirmMutation.isPending ? '확정 중...' : '최종 확정'}
+                  </Button>
+                </Box>
+              </>
+            )}
+          </Box>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
