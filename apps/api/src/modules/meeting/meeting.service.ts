@@ -229,21 +229,24 @@ export class MeetingService {
 
     while (current <= end) {
       const isHoliday = await this.holidayAdapter.isHoliday(current);
+      const slotsToCreate = [];
 
       for (let hour = 0; hour < 24; hour++) {
         for (let minute = 0; minute < 60; minute += 30) {
           const slotTime = new Date(current);
           slotTime.setHours(hour, minute, 0, 0);
 
-          await this.prisma.timeSlot.create({
-            data: {
-              requestId,
-              slotDate: slotTime,
-              status: isHoliday ? SlotStatus.BLOCKED : SlotStatus.AVAILABLE,
-            },
+          slotsToCreate.push({
+            requestId,
+            slotDate: slotTime,
+            status: isHoliday ? SlotStatus.BLOCKED : SlotStatus.AVAILABLE,
           });
         }
       }
+
+      await this.prisma.timeSlot.createMany({
+        data: slotsToCreate,
+      });
 
       current.setDate(current.getDate() + 1);
     }

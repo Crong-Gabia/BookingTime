@@ -8,6 +8,14 @@ interface ParticipantInput {
   name: string;
 }
 
+const DURATION_OPTIONS = [
+  { value: 30, label: '30분' },
+  { value: 60, label: '1시간' },
+  { value: 90, label: '1시간 30분' },
+  { value: 120, label: '2시간' },
+  { value: 180, label: '3시간' },
+];
+
 export default function CreatePage() {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
@@ -184,11 +192,11 @@ export default function CreatePage() {
             onChange={(e) => setDurationMinutes(Number(e.target.value))}
             disabled={isSubmitting}
           >
-            <MenuItem value={30}>30분</MenuItem>
-            <MenuItem value={60}>1시간</MenuItem>
-            <MenuItem value={90}>1시간 30분</MenuItem>
-            <MenuItem value={120}>2시간</MenuItem>
-            <MenuItem value={180}>3시간</MenuItem>
+            {DURATION_OPTIONS.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
           </TextField>
         </Box>
 
