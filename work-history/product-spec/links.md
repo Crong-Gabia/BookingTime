@@ -2,7 +2,7 @@
 
 ## Confluence
 
-- **기획서 원본**: [링크 추가 필요]
+- **기획서 원본**: [기획서](https://confluence.gabia.com/spaces/~jty/pages/237643339/%EB%90%98%EB%8A%94+%EC%8B%9C%EA%B0%84)
 - **화면 기획**: [링크 추가 필요]
 - **정책/룰**: [링크 추가 필요]
 
