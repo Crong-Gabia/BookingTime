@@ -51,6 +51,10 @@ export class MeetingService {
 
     await this.generateTimeSlots(request.id, request.startDate, request.endDate);
 
+    if (dto.organizerAvailableSlots && dto.organizerAvailableSlots.length > 0) {
+      await this.updateOrganizerAvailability(request.id, dto.organizerAvailableSlots);
+    }
+
     return {
       id: request.id,
       title: request.title,
@@ -91,6 +95,15 @@ export class MeetingService {
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
+    const organizerSlots = await this.prisma.timeSlot.findMany({
+      where: {
+        requestId,
+        participantId: null,
+        status: SlotStatus.AVAILABLE,
+      },
+      select: { slotDate: true },
+    });
+
     return {
       requestId: request.id,
       title: request.title,
@@ -101,6 +114,7 @@ export class MeetingService {
         responded: p.responded,
       })),
       commonAvailableSlots,
+      organizerAvailableSlots: organizerSlots.map((s) => s.slotDate.toISOString()),
       createdAt: request.createdAt.toISOString(),
       startDate: request.startDate.toISOString(),
       endDate: request.endDate.toISOString(),
@@ -266,6 +280,22 @@ export class MeetingService {
 
       current.setDate(current.getDate() + 1);
     }
+  }
+
+  private async updateOrganizerAvailability(requestId: string, availableSlots: string[]) {
+    await this.prisma.$transaction(async (tx) => {
+      await tx.timeSlot.updateMany({
+        where: {
+          requestId,
+          participantId: null,
+          status: SlotStatus.AVAILABLE,
+          slotDate: {
+            notIn: availableSlots.map((s) => new Date(s)),
+          },
+        },
+        data: { status: SlotStatus.UNAVAILABLE },
+      });
+    });
   }
 
   private async findCommonAvailableSlots(requestId: string): Promise<string[]> {

@@ -21,6 +21,7 @@ export interface CreateMeetingRequestDto {
   endDate: string;
   durationMinutes: number;
   location?: string;
+  organizerAvailableSlots?: string[];
 }
 
 export interface CreateMeetingResponseDto {
@@ -56,6 +57,7 @@ export interface DashboardDto {
     date: string;
     times: string[];
   }>;
+  organizerAvailableSlots?: string[];
   createdAt: string;
   startDate: string;
   endDate: string;

@@ -51,6 +51,7 @@ export default function ResponsePage() {
         participants: Array<{ userId: string; name: string; responded: boolean }>;
         startDate: string;
         endDate: string;
+        organizerAvailableSlots?: string[];
       }>;
     },
   });
@@ -115,6 +116,11 @@ export default function ResponsePage() {
     const hour = parseInt(time.split(':')[0]);
     const dayOfWeek = new Date(date).getDay();
     return hour === 12 || dayOfWeek === 0 || dayOfWeek === 6;
+  };
+
+  const isOrganizerUnavailable = (slotIso: string): boolean => {
+    if (!dashboardData?.organizerAvailableSlots) return false;
+    return !dashboardData.organizerAvailableSlots.includes(slotIso);
   };
 
   const getSlotStatus = (slotIso: string) => {
@@ -400,7 +406,9 @@ export default function ResponsePage() {
                 const status = getSlotStatus(slotIso);
                 const isAvailable = status === 'available';
                 const isUnavailable = status === 'unavailable';
-                const isBlocked = isBlockedSlot(dateSlot.date, time);
+                const isHolidayBlocked = isBlockedSlot(dateSlot.date, time);
+                const isOrganizerBlocked = isOrganizerUnavailable(slotIso);
+                const isBlocked = isHolidayBlocked || isOrganizerBlocked;
                 const isUnselected = status === 'none';
 
                 return (
@@ -415,17 +423,22 @@ export default function ResponsePage() {
                         ? '3px solid #4caf50'
                         : isUnavailable
                           ? '3px solid #f44336'
-                          : '2px solid #e0e0e0',
+                          : isOrganizerBlocked
+                            ? '2px dashed #ff9800'
+                            : '2px solid #e0e0e0',
                       borderRadius: '8px',
                       backgroundColor: isAvailable
                         ? '#e8f5e9'
                         : isUnavailable
                           ? '#ffebee'
-                          : 'white',
-                      color: isAvailable ? '#2e7d32' : isUnavailable ? '#c62828' : '#333',
+                          : isOrganizerBlocked
+                            ? '#fff3e0'
+                            : 'white',
+                      color: isAvailable ? '#2e7d32' : isUnavailable ? '#c62828' : isOrganizerBlocked ? '#e65100' : '#333',
                       fontWeight: 'bold',
-                      opacity: isBlocked ? 0.4 : 1,
+                      opacity: isHolidayBlocked ? 0.4 : isOrganizerBlocked ? 0.6 : 1,
                       fontSize: '0.875rem',
+                      position: 'relative',
                     }}
                   >
                     {time}

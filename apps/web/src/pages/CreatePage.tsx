@@ -26,7 +26,6 @@ export default function CreatePage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [durationMinutes, setDurationMinutes] = useState(60);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddParticipant = () => {
     setParticipants([...participants, { email: '', name: '' }]);
@@ -44,7 +43,7 @@ export default function CreatePage() {
     setParticipants(updated);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!title || !startDate || !endDate) {
       alert('필수 정보를 모두 입력해주세요.');
       return;
@@ -56,35 +55,21 @@ export default function CreatePage() {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const response = await fetch('/api/meetings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          description,
-          organizerId: 'organizer-1',
-          participantIds: validParticipants.map((p) => p.email),
-          startDate,
-          endDate,
-          durationMinutes,
-        }),
+    const meetingData = {
+      title,
+      description,
+      organizerId: 'organizer-1',
+      participantIds: validParticipants.map((p) => p.email),
+      requiredParticipantIds: [],
+      startDate,
+      endDate,
+      durationMinutes,
+      location: '',
+    };
+
+      navigate('/requests/new/slots', {
+        state: { meetingData },
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to create meeting');
-      }
-
-      const data = await response.json();
-
-      alert(`회의 요청이 생성되었습니다!\n\n대시보드 링크:\n${window.location.origin}/requests/${data.id}/dashboard`);
-      navigate(`/requests/${data.id}/dashboard`);
-    } catch (_error) {
-      alert('회의 요청 생성에 실패했습니다.');
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -108,7 +93,6 @@ export default function CreatePage() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="예: 팀 주간회의"
           sx={{ mb: 3 }}
-          disabled={isSubmitting}
         />
 
         <TextField
@@ -120,7 +104,6 @@ export default function CreatePage() {
           multiline
           rows={3}
           sx={{ mb: 3 }}
-          disabled={isSubmitting}
         />
 
         <Typography variant="subtitle1" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>
@@ -135,7 +118,6 @@ export default function CreatePage() {
                 value={participant.email}
                 onChange={(e) => handleParticipantChange(index, 'email', e.target.value)}
                 sx={{ flex: 1 }}
-                disabled={isSubmitting}
               />
               <TextField
                 type="text"
@@ -143,14 +125,12 @@ export default function CreatePage() {
                 value={participant.name}
                 onChange={(e) => handleParticipantChange(index, 'name', e.target.value)}
                 sx={{ flex: 1 }}
-                disabled={isSubmitting}
               />
               {participants.length > 1 && (
                 <Button
                   variant="contained"
                   color="error"
                   onClick={() => handleRemoveParticipant(index)}
-                  disabled={isSubmitting}
                 >
                   삭제
                 </Button>
@@ -161,7 +141,6 @@ export default function CreatePage() {
             variant="outlined"
             onClick={handleAddParticipant}
             startIcon={<span>+</span>}
-            disabled={isSubmitting}
           >
             참석자 추가
           </Button>
@@ -174,7 +153,6 @@ export default function CreatePage() {
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
-            disabled={isSubmitting}
           />
           <TextField
             type="date"
@@ -182,14 +160,12 @@ export default function CreatePage() {
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
-            disabled={isSubmitting}
           />
           <TextField
             select
             label="소요시간 *"
             value={durationMinutes}
             onChange={(e) => setDurationMinutes(Number(e.target.value))}
-            disabled={isSubmitting}
           >
             {DURATION_OPTIONS.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -204,10 +180,9 @@ export default function CreatePage() {
           fullWidth
           size="large"
           onClick={handleSubmit}
-          disabled={isSubmitting}
           sx={{ mb: 2 }}
         >
-          {isSubmitting ? '생성 중...' : '회의 요청 생성'}
+          다음: 시간 선택
         </Button>
 
         <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1 }}>

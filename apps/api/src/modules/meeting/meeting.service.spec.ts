@@ -97,6 +97,123 @@ describe('MeetingService', () => {
       (prisma.meetingRequest.findUnique as jest.Mock).mockResolvedValue(mockRequest);
     });
   });
+
+  describe('주최자 시간 선택', () => {
+    it('주최자 시간 슬롯 업데이트', async () => {
+      const mockRequest = {
+        id: 'test-request-id',
+        title: 'Test Meeting',
+        organizerId: 'user-1',
+        startDate: new Date('2026-01-20'),
+        endDate: new Date('2026-01-21'),
+        durationMinutes: 60,
+        status: 'OPEN',
+        createdAt: new Date(),
+      };
+
+      (prisma.meetingRequest.create as jest.Mock).mockResolvedValue(mockRequest);
+      (prisma.timeSlot.createMany as jest.Mock).mockResolvedValue({ count: 96 });
+      (prisma.timeSlot.updateMany as jest.Mock).mockResolvedValue({ count: 50 });
+
+      const dto: CreateMeetingRequestDto = {
+        title: 'Test Meeting',
+        organizerId: 'user-1',
+        participantIds: ['user-2'],
+        requiredParticipantIds: ['user-2'],
+        startDate: '2026-01-20',
+        endDate: '2026-01-21',
+        durationMinutes: 60,
+        organizerAvailableSlots: [
+          '2026-01-20T09:00:00Z',
+          '2026-01-20T10:00:00Z',
+          '2026-01-20T14:00:00Z',
+        ],
+      };
+
+      await service.createRequest(dto);
+
+      expect(prisma.timeSlot.updateMany).toHaveBeenCalledWith({
+        where: {
+          requestId: 'test-request-id',
+          participantId: null,
+          status: 'AVAILABLE',
+          slotDate: {
+            notIn: [
+              new Date('2026-01-20T09:00:00Z'),
+              new Date('2026-01-20T10:00:00Z'),
+              new Date('2026-01-20T14:00:00Z'),
+            ],
+          },
+        },
+        data: { status: 'UNAVAILABLE' },
+      });
+    });
+
+    it('주최자 시간 없으면 모든 슬롯 유지', async () => {
+      const mockRequest = {
+        id: 'test-request-id',
+        title: 'Test Meeting',
+        organizerId: 'user-1',
+        startDate: new Date('2026-01-20'),
+        endDate: new Date('2026-01-21'),
+        durationMinutes: 60,
+        status: 'OPEN',
+        createdAt: new Date(),
+      };
+
+      (prisma.meetingRequest.create as jest.Mock).mockResolvedValue(mockRequest);
+      (prisma.timeSlot.createMany as jest.Mock).mockResolvedValue({ count: 96 });
+      (prisma.timeSlot.updateMany as jest.Mock).mockResolvedValue({ count: 0 });
+
+      const dto: CreateMeetingRequestDto = {
+        title: 'Test Meeting',
+        organizerId: 'user-1',
+        participantIds: ['user-2'],
+        requiredParticipantIds: ['user-2'],
+        startDate: '2026-01-20',
+        endDate: '2026-01-21',
+        durationMinutes: 60,
+        organizerAvailableSlots: [],
+      };
+
+      await service.createRequest(dto);
+
+      expect(prisma.timeSlot.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('대시보드에 주최자 시간 슬롯 반환', async () => {
+      const mockRequest = {
+        id: 'test-request-id',
+        title: 'Test Meeting',
+        status: 'OPEN',
+        participants: [],
+        createdAt: new Date('2026-01-20'),
+        startDate: new Date('2026-01-20'),
+        endDate: new Date('2026-01-21'),
+        durationMinutes: 60,
+      };
+
+      const mockOrganizerSlots = [
+        { slotDate: new Date('2026-01-20T09:00:00Z') },
+        { slotDate: new Date('2026-01-20T10:00:00Z') },
+        { slotDate: new Date('2026-01-20T14:00:00Z') },
+      ];
+
+      (prisma.meetingRequest.findUnique as jest.Mock).mockResolvedValue(mockRequest);
+      (prisma.timeSlot.findMany as jest.Mock)
+        .mockResolvedValueOnce(mockOrganizerSlots)
+        .mockResolvedValueOnce([]);
+      (prisma.participant.findMany as jest.Mock).mockResolvedValue([]);
+
+      const result = await service.getDashboard('test-request-id');
+
+      expect(result.organizerAvailableSlots).toEqual([
+        '2026-01-20T09:00:00.000Z',
+        '2026-01-20T10:00:00.000Z',
+        '2026-01-20T14:00:00.000Z',
+      ]);
+    });
+  });
 });
 
 class RoomAdapterMock implements IRoomAdapter {
