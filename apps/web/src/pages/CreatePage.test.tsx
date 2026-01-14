@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import CreatePage from './CreatePage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -72,7 +72,7 @@ describe('CreatePage', () => {
     expect(screen.getByLabelText('소요시간 *')).toBeInTheDocument();
   });
 
-  it('회의 요청 생성 버튼이 있어야 한다', () => {
+  it('다음: 시간 선택 버튼이 있어야 한다', () => {
     renderWithProviders(<CreatePage />);
     const submitButton = screen.getByRole('button', { name: '다음: 시간 선택' });
     expect(submitButton).toBeInTheDocument();
