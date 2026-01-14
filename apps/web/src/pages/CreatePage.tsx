@@ -182,7 +182,7 @@ export default function CreatePage() {
           onClick={handleSubmit}
           sx={{ mb: 2 }}
         >
-          다음: 시간 선택
+          회의 요청 생성
         </Button>
 
         <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1 }}>
