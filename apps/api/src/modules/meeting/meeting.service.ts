@@ -31,6 +31,11 @@ export class MeetingService {
       throw new BadRequestException(ERROR_CODES.INVALID_TIME_RANGE, 'Invalid date range');
     }
 
+    const responseDeadlineAt = dto.responseDeadlineAt ? new Date(dto.responseDeadlineAt) : null;
+    if (dto.responseDeadlineAt && Number.isNaN(responseDeadlineAt?.getTime())) {
+      throw new BadRequestException('Invalid response deadline');
+    }
+
     const request = await this.prisma.meetingRequest.create({
       data: {
         title: dto.title,
@@ -40,6 +45,7 @@ export class MeetingService {
         durationMinutes: dto.durationMinutes,
         location: dto.location,
         status: MeetingStatus.OPEN,
+        responseDeadlineAt: responseDeadlineAt ?? undefined,
         participants: {
           create: dto.participantIds.map((userId) => ({
             userId,
@@ -64,6 +70,7 @@ export class MeetingService {
       endDate: request.endDate.toISOString(),
       durationMinutes: request.durationMinutes,
       createdAt: request.createdAt.toISOString(),
+      responseDeadlineAt: request.responseDeadlineAt?.toISOString() ?? null,
     };
   }
 
@@ -119,6 +126,7 @@ export class MeetingService {
       startDate: request.startDate.toISOString(),
       endDate: request.endDate.toISOString(),
       durationMinutes: request.durationMinutes,
+      responseDeadlineAt: request.responseDeadlineAt?.toISOString() ?? null,
     };
   }
 
@@ -131,6 +139,10 @@ export class MeetingService {
       }
 
       if (request.status === MeetingStatus.CONFIRMED || request.closedAt) {
+        throw new BadRequestException(ERROR_CODES.REQUEST_CLOSED, 'Request is closed');
+      }
+
+      if (request.responseDeadlineAt && new Date() >= request.responseDeadlineAt) {
         throw new BadRequestException(ERROR_CODES.REQUEST_CLOSED, 'Request is closed');
       }
 
@@ -182,6 +194,23 @@ export class MeetingService {
   }
 
   async remindParticipant(requestId: string, userId: string): Promise<RemindResponseDto> {
+    const request = await this.prisma.meetingRequest.findUnique({
+      where: { id: requestId },
+      select: { status: true, closedAt: true, responseDeadlineAt: true },
+    });
+
+    if (!request) {
+      throw new NotFoundException('Meeting request not found');
+    }
+
+    if (request.status === MeetingStatus.CONFIRMED || request.closedAt) {
+      throw new BadRequestException(ERROR_CODES.REQUEST_CLOSED, 'Request is closed');
+    }
+
+    if (request.responseDeadlineAt && new Date() >= request.responseDeadlineAt) {
+      throw new BadRequestException(ERROR_CODES.REQUEST_CLOSED, 'Request is closed');
+    }
+
     const participant = await this.prisma.participant.findFirst({
       where: { requestId, userId },
     });
@@ -283,18 +312,16 @@ export class MeetingService {
   }
 
   private async updateOrganizerAvailability(requestId: string, availableSlots: string[]) {
-    await this.prisma.$transaction(async (tx) => {
-      await tx.timeSlot.updateMany({
-        where: {
-          requestId,
-          participantId: null,
-          status: SlotStatus.AVAILABLE,
-          slotDate: {
-            notIn: availableSlots.map((s) => new Date(s)),
-          },
+    await this.prisma.timeSlot.updateMany({
+      where: {
+        requestId,
+        participantId: null,
+        status: SlotStatus.AVAILABLE,
+        slotDate: {
+          notIn: availableSlots.map((s) => new Date(s)),
         },
-        data: { status: SlotStatus.UNAVAILABLE },
-      });
+      },
+      data: { status: SlotStatus.UNAVAILABLE },
     });
   }
 

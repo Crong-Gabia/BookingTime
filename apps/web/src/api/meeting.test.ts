@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import {
   fetchDashboard,
   createMeeting,
@@ -25,7 +25,7 @@ describe('fetchDashboard', () => {
       endDate: '2026-01-17',
       durationMinutes: 60,
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => mockData,
     });
@@ -38,7 +38,7 @@ describe('fetchDashboard', () => {
   // GET 메서드 검증
   it('GET 메서드로 요청해야 함', async () => {
     const mockData = { requestId: 'req-123', title: 'Test' };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => mockData,
     });
@@ -50,7 +50,7 @@ describe('fetchDashboard', () => {
 
   // 에러 케이스: fetch 실패 시 에러를 던져야 함
   it('fetch 실패 시 에러를 던져야 함', async () => {
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: false,
     });
 
@@ -79,7 +79,7 @@ describe('createMeeting', () => {
       meetingUrl: 'https://example.com/meetings/req-new',
       responseUrl: 'https://example.com/meetings/req-new/respond',
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => mockResponse,
     });
@@ -99,7 +99,7 @@ describe('createMeeting', () => {
       participantIds: ['user-1'],
       organizerId: 'org-1',
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ requestId: 'req-1' }),
     });
@@ -124,14 +124,14 @@ describe('createMeeting', () => {
       participantIds: ['p1', 'p2', 'p3'],
       organizerId: 'org-1',
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ requestId: 'req-2' }),
     });
 
     await createMeeting(payload);
 
-    const callArgs = (global.fetch as vi.Mock).mock.calls[0];
+    const callArgs = (global.fetch as Mock).mock.calls[0];
     const body = JSON.parse(callArgs[1].body);
     expect(body).toEqual(payload);
   });
@@ -146,7 +146,7 @@ describe('createMeeting', () => {
       participantIds: ['user-1'],
       organizerId: 'org-1',
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ requestId: 'req-1' }),
     });
@@ -166,7 +166,7 @@ describe('createMeeting', () => {
       participantIds: ['user-1'],
       organizerId: 'org-1',
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: false,
     });
 
@@ -189,7 +189,7 @@ describe('submitResponse', () => {
       unavailableSlots: ['2026-01-15T11:00'],
     };
     const mockResponse = { success: true };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => mockResponse,
     });
@@ -208,7 +208,7 @@ describe('submitResponse', () => {
       availableSlots: [],
       unavailableSlots: [],
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ success: true }),
     });
@@ -231,14 +231,14 @@ describe('submitResponse', () => {
       availableSlots: ['slot1', 'slot2'],
       unavailableSlots: ['slot3'],
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ success: true }),
     });
 
     await submitResponse(payload);
 
-    const callArgs = (global.fetch as vi.Mock).mock.calls[0];
+    const callArgs = (global.fetch as Mock).mock.calls[0];
     const body = JSON.parse(callArgs[1].body);
     expect(body).toEqual(payload);
   });
@@ -252,7 +252,7 @@ describe('submitResponse', () => {
       availableSlots: [],
       unavailableSlots: [],
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: false,
     });
 
@@ -268,7 +268,7 @@ describe('sendReminder', () => {
   // 성공 케이스: 리마인더 전송 성공
   it('성공 시 리마인더 전송 결과를 반환해야 함', async () => {
     const mockResponse = { sent: true };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => mockResponse,
     });
@@ -280,7 +280,7 @@ describe('sendReminder', () => {
 
   // POST 메서드 검증
   it('POST 메서드로 요청해야 함', async () => {
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ sent: true }),
     });
@@ -294,7 +294,7 @@ describe('sendReminder', () => {
 
   // 엔드포인트 URL 검증
   it('올바른 엔드포인트를 호출해야 함', async () => {
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ sent: true }),
     });
@@ -308,7 +308,7 @@ describe('sendReminder', () => {
 
   // 에러 케이스: fetch 실패 시 에러를 던져야 함
   it('fetch 실패 시 에러를 던져야 함', async () => {
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: false,
     });
 
@@ -331,7 +331,7 @@ describe('confirmMeeting', () => {
       location: 'room-1',
     };
     const mockResponse = { confirmed: true, meetingId: 'm-123' };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => mockResponse,
     });
@@ -348,7 +348,7 @@ describe('confirmMeeting', () => {
       selectedTimeSlot: '2026-01-16T10:00:00',
       location: 'room-1',
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ confirmed: true }),
     });
@@ -369,14 +369,14 @@ describe('confirmMeeting', () => {
       selectedTimeSlot: '2026-01-17T14:00:00',
       location: 'room-2',
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ confirmed: true }),
     });
 
     await confirmMeeting(payload);
 
-    const callArgs = (global.fetch as vi.Mock).mock.calls[0];
+    const callArgs = (global.fetch as Mock).mock.calls[0];
     const body = JSON.parse(callArgs[1].body);
     expect(body).toEqual(payload);
   });
@@ -388,7 +388,7 @@ describe('confirmMeeting', () => {
       selectedTimeSlot: '2026-01-16T10:00:00',
       location: 'room-1',
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => ({ confirmed: true }),
     });
@@ -405,7 +405,7 @@ describe('confirmMeeting', () => {
       selectedTimeSlot: '2026-01-16T10:00:00',
       location: 'room-1',
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: false,
     });
 

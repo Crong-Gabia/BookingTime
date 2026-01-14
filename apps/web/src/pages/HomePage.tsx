@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAllMeetings, type Meeting } from '../api/client';
+import { getAllMeetings } from '../api/client';
 import { useNavigate } from 'react-router-dom';
 import { Container, Typography, Grid, Box, Button } from '@mui/material';
 import MeetingCard from '@/components/meeting-card';
@@ -14,7 +14,7 @@ export default function HomePage() {
     queryFn: checkHealth,
   });
 
-  const { data: meetingsData, isLoading: meetingsLoading } = useQuery({
+  const { data: meetingsData } = useQuery({
     queryKey: ['meetings'],
     queryFn: getAllMeetings,
     retry: false,

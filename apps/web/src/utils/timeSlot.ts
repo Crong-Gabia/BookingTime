@@ -5,6 +5,12 @@ export interface TimeSlotData {
   slots: string[];
 }
 
+export interface TimeSlot {
+  isoString: string;
+  time: string;
+  date: string;
+}
+
 export const generateTimeSlots = (startDateString: string, endDateString: string): TimeSlotData[] => {
   if (!startDateString || !endDateString) return [];
 
@@ -46,6 +52,58 @@ export const generateTimeSlots = (startDateString: string, endDateString: string
 
     return { date, slots };
   });
+};
+
+export const parseSlot = (slotString: string): TimeSlot | null => {
+  const parts = slotString.split('|');
+  if (parts.length !== 2) return null;
+
+  const [isoString, time] = parts;
+  const date = new Date(isoString);
+  const datePart = date.toISOString().split('T')[0];
+
+  return { isoString, time, date: datePart };
+};
+
+export const formatSlot = (slot: TimeSlot): string => {
+  return `${slot.isoString}|${slot.time}`;
+};
+
+// Get slots for a specific date as structured TimeSlot objects
+export const getSlotsForDate = (timeSlotData: TimeSlotData[], dateIso: string): TimeSlot[] => {
+  const dateData = timeSlotData.find((ds) => ds.date === dateIso);
+  if (!dateData) return [];
+
+  return dateData.slots
+    .map(parseSlot)
+    .filter((slot): slot is TimeSlot => slot !== null);
+};
+
+// Format date for display (e.g., "1월 15일 (수)")
+export const formatDateDisplay = (dateIso: string): string => {
+  const date = new Date(dateIso);
+  return date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+};
+
+// Format short date for calendar (e.g., "15")
+export const formatShortDate = (dateIso: string): string => {
+  const date = new Date(dateIso);
+  return date.getDate().toString();
+};
+
+// Format range display (e.g., "1월 15일 - 1월 20일")
+export const formatRangeDisplay = (startDateIso: string, endDateIso: string): string => {
+  const startDate = new Date(startDateIso);
+  const endDate = new Date(endDateIso);
+
+  const startStr = startDate.toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' });
+  const endStr = endDate.toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' });
+
+  if (startStr === endStr) {
+    return startStr;
+  }
+
+  return `${startStr} - ${endStr}`;
 };
 
 export const isBlockedSlot = (date: string, time: string): boolean => {

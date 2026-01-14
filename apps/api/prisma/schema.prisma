@@ -18,6 +18,7 @@ model MeetingRequest {
   location          String?
   version           Int              @default(1)
   closedAt          DateTime?
+  responseDeadlineAt DateTime?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
   deletedAt         DateTime?

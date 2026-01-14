@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useToast } from '@/hooks/useToast';
 import {
   AppBar,
   Toolbar,
@@ -20,6 +21,7 @@ import { generateTimeSlots, isBlockedSlot } from '../utils/timeSlot';
 export default function ResponsePage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [name, setName] = useState('');
   const [slotSelections, setSlotSelections] = useState<Record<string, 'available' | 'unavailable' | undefined>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -181,7 +183,7 @@ export default function ResponsePage() {
       setIsSubmitted(true);
     },
     onError: (error: Error) => {
-      alert(`제출 실패: ${error.message}`);
+      toast.error(`제출 실패: ${error.message}`);
     },
     onSettled: () => {
       setIsSubmitting(false);
@@ -190,7 +192,7 @@ export default function ResponsePage() {
 
   const handleSubmit = () => {
     if (Object.keys(slotSelections).length === 0) {
-      alert('최소 하나 이상의 시간을 선택해주세요.');
+      toast.error('최소 하나 이상의 시간을 선택해주세요.');
       return;
     }
 
