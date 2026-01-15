@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "nest start --watch",
+    "prebuild": "pnpm --filter shared build",
     "build": "prisma generate && nest build",
     "lint": "eslint \"{src,test}/**/*.ts\" --max-warnings 0",
     "lint:fix": "eslint \"{src,test}/**/*.ts\" --fix",
