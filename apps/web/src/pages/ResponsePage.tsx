@@ -27,22 +27,51 @@ export default function ResponsePage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const parseJsonBody = (value: string) => {
+    if (!value) return null;
+    try {
+      return JSON.parse(value) as { message?: string } | null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const readResponseBody = async (response: Response) => {
+    if (typeof response.text === 'function') {
+      const text = await response.text();
+      return { text, data: parseJsonBody(text) };
+    }
+
+    if (typeof response.json === 'function') {
+      const data = (await response.json()) as { message?: string } | null;
+      return { text: '', data };
+    }
+
+    return { text: '', data: null };
+  };
+
   const { data: dashboardData, isLoading: dashboardLoading, error: dashboardError } = useQuery({
     queryKey: ['meeting-dashboard', id],
     enabled: Boolean(id),
     queryFn: async () => {
       const response = await fetch(`/api/meetings/${id}/dashboard`);
+      const { text, data } = await readResponseBody(response);
+
       if (!response.ok) {
         let message = 'Failed to load dashboard';
-        try {
-          const errorBody = await response.json();
-          if (errorBody?.message && typeof errorBody.message === 'string') {
-            message = errorBody.message;
-          }
-        } catch {}
+        if (data && typeof data.message === 'string') {
+          message = data.message;
+        } else if (text) {
+          message = text;
+        }
         throw new Error(message);
       }
-      return response.json() as Promise<{
+
+      if (!data) {
+        throw new Error('Failed to load dashboard');
+      }
+
+      return data as {
         requestId: string;
         title: string;
         status: string;
@@ -50,7 +79,7 @@ export default function ResponsePage() {
         startDate: string;
         endDate: string;
         organizerAvailableSlots?: string[];
-      }>;
+      };
     },
   });
 
@@ -166,17 +195,19 @@ export default function ResponsePage() {
         }),
       });
 
-      const responseBody = await response.text();
-      const data = responseBody ? JSON.parse(responseBody) : null;
+      const { text, data } = await readResponseBody(response);
 
       if (!response.ok) {
         if (data && typeof data.message === 'string') {
           throw new Error(data.message);
         }
+        if (text) {
+          throw new Error(text);
+        }
         throw new Error('제출 실패');
       }
 
-      return data;
+      return data ?? text ?? null;
     },
     onSuccess: () => {
       setIsSubmitted(true);
