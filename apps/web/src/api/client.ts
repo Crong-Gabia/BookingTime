@@ -36,6 +36,8 @@ export interface Meeting {
   status: string;
   responseRate: number;
   createdAt: string;
+  meetingType?: 'GENERAL' | 'COMPANY_DINNER';
+  mealTime?: 'LUNCH' | 'DINNER' | null;
 }
 
 export async function getAllMeetings(): Promise<{ meetings: Meeting[] }> {

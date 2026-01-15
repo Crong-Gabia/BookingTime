@@ -88,6 +88,8 @@ export default function HomePage() {
                 responseRate={meeting.responseRate}
                 totalParticipants={5}
                 respondedParticipants={Math.round(5 * meeting.responseRate / 100)}
+                meetingType={meeting.meetingType}
+                mealTime={meeting.mealTime}
                 onClick={() => navigate(`/requests/${meeting.id}/dashboard`)}
               />
             </Grid>
@@ -112,6 +114,8 @@ export default function HomePage() {
                 responseRate={100}
                 totalParticipants={5}
                 respondedParticipants={5}
+                meetingType={meeting.meetingType}
+                mealTime={meeting.mealTime}
                 onClick={() => navigate(`/requests/${meeting.id}/dashboard`)}
               />
             </Grid>

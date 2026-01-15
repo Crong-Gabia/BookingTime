@@ -31,7 +31,7 @@ export default function ResponsePage() {
     if (!value) return null;
     try {
       return JSON.parse(value) as { message?: string } | null;
-    } catch (error) {
+    } catch {
       return null;
     }
   };
@@ -87,11 +87,13 @@ export default function ResponsePage() {
   const [selectedUserId, setSelectedUserId] = useState<string>('');
 
   useEffect(() => {
-    if (!selectedUserId && participants.length > 0) {
-      setSelectedUserId(participants[0].userId);
-      setName(participants[0].name);
-    }
-  }, [participants, selectedUserId]);
+    if (participants.length === 0) return;
+
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setSelectedUserId((prev) => prev || participants[0].userId);
+    setName((prev) => prev || participants[0].name);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [participants]);
 
   const startDateString = dashboardData?.startDate;
   const endDateString = dashboardData?.endDate;

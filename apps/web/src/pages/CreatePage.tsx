@@ -89,6 +89,11 @@ export default function CreatePage() {
       return;
     }
 
+    if (meetingType === 'company_dinner' && !mealTime) {
+      toast.error('회식인 경우 식사 시간을 선택해주세요.');
+      return;
+    }
+
     const responseDeadlineAt = getResponseDeadlineISO();
 
     if (responseDeadlineAt) {

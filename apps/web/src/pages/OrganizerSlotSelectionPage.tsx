@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { generateTimeSlots, formatDateDisplay } from '../utils/timeSlot';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/useToast';
@@ -23,7 +23,8 @@ import PeopleIcon from '@mui/icons-material/People';
 import DescriptionIcon from '@mui/icons-material/Description';
 
 // Temporary blocking logic - can be enhanced with external adapters later
-const isBlockedSlot = (_date: string, time: string) => {
+const isBlockedSlot = (_date: string, time: string, meetingType?: 'general' | 'company_dinner') => {
+  if (meetingType === 'company_dinner') return false;
   if (time.startsWith('12:')) return true;
   return false;
 };
@@ -39,6 +40,8 @@ interface MeetingFormData {
   durationMinutes: number;
   location?: string;
   responseDeadlineAt?: string | null;
+  meetingType?: 'general' | 'company_dinner';
+  mealTime?: 'lunch' | 'dinner' | '';
 }
 
 export default function OrganizerSlotSelectionPage() {
@@ -51,6 +54,59 @@ export default function OrganizerSlotSelectionPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
+  const meetingType = meetingData?.meetingType ?? 'general';
+  const mealTime = meetingData?.mealTime ?? '';
+
+  const toMinutes = (time: string) => {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const getMealTimeRange = (value: typeof mealTime) => {
+    if (value === 'lunch') {
+      return { start: 12 * 60, end: 13 * 60 };
+    }
+
+    if (value === 'dinner') {
+      return { start: 18 * 60, end: 20 * 60 };
+    }
+
+    return null;
+  };
+
+  const filterSlotsForMealTime = (slots: string[]) => {
+    if (meetingType !== 'company_dinner' || !mealTime) {
+      return slots;
+    }
+
+    const range = getMealTimeRange(mealTime);
+    if (!range) {
+      return [];
+    }
+
+    return slots.filter((slot) => {
+      const [, time] = slot.split('|');
+      if (!time) return false;
+      const minutes = toMinutes(time);
+      return minutes >= range.start && minutes < range.end;
+    });
+  };
+
+  const buildTimeSlotData = useCallback(() => {
+    const baseSlots = generateTimeSlots(meetingData?.startDate || '', meetingData?.endDate || '');
+
+    if (meetingType !== 'company_dinner') {
+      return baseSlots;
+    }
+
+    return baseSlots
+      .map((dateSlot) => ({
+        ...dateSlot,
+        slots: filterSlotsForMealTime(dateSlot.slots),
+      }))
+      .filter((dateSlot) => dateSlot.slots.length > 0);
+  }, [meetingData?.startDate, meetingData?.endDate, meetingType, mealTime, filterSlotsForMealTime]);
+
   useEffect(() => {
     if (!meetingData || !meetingData.title || !meetingData.startDate || !meetingData.endDate) {
       toast.error('만남 정보가 없습니다. 다시 생성해주세요.');
@@ -58,16 +114,19 @@ export default function OrganizerSlotSelectionPage() {
       return;
     }
 
-    const timeSlotData = generateTimeSlots(meetingData.startDate || '', meetingData.endDate || '');
+    if (meetingType === 'company_dinner' && !mealTime) {
+      toast.error('회식인 경우 식사 시간을 선택해주세요.');
+      navigate('/requests/new');
+      return;
+    }
+
+    const timeSlotData = buildTimeSlotData();
     if (timeSlotData.length > 0 && !selectedDate) {
       setSelectedDate(timeSlotData[0].date);
     }
-  }, [meetingData, navigate, selectedDate]);
+  }, [meetingData, meetingType, mealTime, navigate, selectedDate, buildTimeSlotData, toast]);
 
-  const startDateString = meetingData?.startDate;
-  const endDateString = meetingData?.endDate;
-
-  const timeSlotData = generateTimeSlots(startDateString || '', endDateString || '');
+  const timeSlotData = buildTimeSlotData();
 
   const toggleSlot = (slotIso: string) => {
     setSelectedSlots((prev) => {
@@ -91,7 +150,7 @@ export default function OrganizerSlotSelectionPage() {
       dateSlots.slots.forEach((slot) => {
         const [slotIso, time] = slot.split('|');
         if (!slotIso || !time) return;
-        if (isBlockedSlot(date, time)) return;
+        if (isBlockedSlot(date, time, meetingType)) return;
         if (value) {
           next[slotIso] = true;
         } else {
@@ -114,11 +173,16 @@ export default function OrganizerSlotSelectionPage() {
 
     setIsSubmitting(true);
     try {
+      const mappedMeetingType = meetingType === 'company_dinner' ? 'COMPANY_DINNER' : 'GENERAL';
+      const mappedMealTime = mealTime === 'lunch' ? 'LUNCH' : mealTime === 'dinner' ? 'DINNER' : null;
+
       const response = await fetch('/api/meetings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...meetingData,
+          meetingType: mappedMeetingType,
+          mealTime: mappedMealTime,
           organizerAvailableSlots: Object.keys(selectedSlots),
         }),
       });
@@ -450,7 +514,7 @@ export default function OrganizerSlotSelectionPage() {
                       if (!slotIso || !time) return null;
 
                       const isSelected = selectedSlots[slotIso];
-                      const isBlocked = isBlockedSlot(selectedDateSlots.date, time);
+                      const isBlocked = isBlockedSlot(selectedDateSlots.date, time, meetingType);
 
                       return (
                         <Button

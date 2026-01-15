@@ -11,6 +11,16 @@ export enum TimeSlotStatus {
   BLOCKED = 'BLOCKED',
 }
 
+export enum MeetingType {
+  GENERAL = 'GENERAL',
+  COMPANY_DINNER = 'COMPANY_DINNER',
+}
+
+export enum MealTime {
+  LUNCH = 'LUNCH',
+  DINNER = 'DINNER',
+}
+
 export interface CreateMeetingRequestDto {
   title: string;
   description?: string;
@@ -23,6 +33,8 @@ export interface CreateMeetingRequestDto {
   location?: string;
   organizerAvailableSlots?: string[];
   responseDeadlineAt?: string | null;
+  meetingType?: MeetingType;
+  mealTime?: MealTime | null;
 }
 
 export interface CreateMeetingResponseDto {
@@ -35,6 +47,8 @@ export interface CreateMeetingResponseDto {
   durationMinutes: number;
   createdAt: string;
   responseDeadlineAt?: string | null;
+  meetingType: MeetingType;
+  mealTime?: MealTime | null;
 }
 
 export interface CreateParticipantResponseDto {
@@ -50,6 +64,8 @@ export interface DashboardDto {
   title: string;
   description?: string;
   status: MeetingRequestStatus;
+  meetingType: MeetingType;
+  mealTime?: MealTime | null;
   participants: Array<{
     userId: string;
     name: string;

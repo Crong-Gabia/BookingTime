@@ -15,7 +15,7 @@ export class MeetingController {
   constructor(private readonly meetingService: MeetingService) {}
 
   @Get()
-  async getAll(): Promise<{ meetings: Array<{ id: string; title: string; status: string; responseRate: number; createdAt: string }> }> {
+  async getAll(): Promise<{ meetings: Array<{ id: string; title: string; status: string; responseRate: number; createdAt: string; meetingType: string; mealTime?: string | null }> }> {
     return this.meetingService.getAllMeetings();
   }
 

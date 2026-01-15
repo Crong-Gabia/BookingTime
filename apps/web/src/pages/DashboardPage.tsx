@@ -104,7 +104,7 @@ export default function DashboardPage() {
           text: `${data?.title || '만남 일정'}에 참석해주세요.`,
           url: responseLink,
         });
-      } catch (_error) {
+      } catch {
         handleCopyLink();
       }
     } else {
@@ -131,6 +131,11 @@ export default function DashboardPage() {
     : 0;
   const respondedCount = data.participants.filter((p: { responded: boolean }) => p.responded).length;
   const totalCount = data.participants.length;
+
+  const meetingTypeLabel = data.meetingType === 'COMPANY_DINNER' ? '회식' : '일반';
+  const mealTimeLabel = data.mealTime === 'LUNCH' ? '점심 12~13시'
+    : data.mealTime === 'DINNER' ? '저녁 18~20시'
+    : undefined;
 
   const participants = data.participants.map((p: { userId: string; name: string; responded: boolean }) => ({
     id: p.userId,
@@ -198,6 +203,18 @@ export default function DashboardPage() {
                   color={responseRate >= 80 ? 'success' : responseRate >= 50 ? 'warning' : 'error'}
                   variant="outlined"
                 />
+                <Chip
+                  label={`유형: ${meetingTypeLabel}`}
+                  color={data.meetingType === 'COMPANY_DINNER' ? 'primary' : 'default'}
+                  variant="outlined"
+                />
+                {mealTimeLabel && (
+                  <Chip
+                    label={`식사 시간: ${mealTimeLabel}`}
+                    color="primary"
+                    variant="outlined"
+                  />
+                )}
               </Box>
             </Paper>
           </Grid>
