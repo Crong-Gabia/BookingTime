@@ -91,11 +91,11 @@ function ResponsePage() {
     onSuccess: () => {
       // 성공 시 캐시 무효화 및 리다이렉트
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      alert('응답이 제출되었습니다!');
+      // 성공 토스트(권장): enqueueSnackbar('응답이 제출되었습니다!', { variant: 'success' })
     },
     onError: (error) => {
       console.error('제출 실패:', error);
-      alert('제출에 실패했습니다. 다시 시도해주세요.');
+      // 실패 토스트(권장): enqueueSnackbar('제출에 실패했습니다. 다시 시도해주세요.', { variant: 'error' })
     },
   });
 
@@ -126,7 +126,7 @@ function ResponsePage() {
 
 **onError**:
 - 실패 시 에러 처리를 수행합니다.
-- 사용자에게 에러 메시지를 표시합니다.
+- 사용자에게 에러 메시지를 표시합니다. (브라우저 `alert` 금지 → 토스트로 통일)
 
 ---
 

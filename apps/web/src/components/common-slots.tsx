@@ -23,6 +23,23 @@ export default function CommonSlots({ slots, onSelectSlot }: CommonSlotsProps) {
     });
   };
 
+  const formatDisplayTime = (isoString: string): string => {
+    try {
+      const date = new Date(isoString);
+      if (isNaN(date.getTime())) {
+        return isoString;
+      }
+      return date.toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Seoul',
+      });
+    } catch {
+      return isoString;
+    }
+  };
+
   const handleSlotClick = (date: string, time: string) => {
     setSelectedSlot({ date, time });
     onSelectSlot(date, time);
@@ -59,7 +76,7 @@ export default function CommonSlots({ slots, onSelectSlot }: CommonSlotsProps) {
                       },
                     }}
                   >
-                    <ListItemText primary={time} />
+                    <ListItemText primary={formatDisplayTime(time)} />
                     {isSelected && (
                       <Chip label="선택됨" size="small" color="primary" />
                     )}

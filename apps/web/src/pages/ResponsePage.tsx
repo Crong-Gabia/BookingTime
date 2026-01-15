@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useToast } from '@/hooks/useToast';
 import {
   AppBar,
   Toolbar,
@@ -15,15 +16,12 @@ import {
   CircularProgress,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
-interface TimeSlotData {
-  date: string;
-  slots: string[];
-}
+import { generateTimeSlots, isBlockedSlot } from '../utils/timeSlot';
 
 export default function ResponsePage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [name, setName] = useState('');
   const [slotSelections, setSlotSelections] = useState<Record<string, 'available' | 'unavailable' | undefined>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -51,6 +49,7 @@ export default function ResponsePage() {
         participants: Array<{ userId: string; name: string; responded: boolean }>;
         startDate: string;
         endDate: string;
+        organizerAvailableSlots?: string[];
       }>;
     },
   });
@@ -68,53 +67,11 @@ export default function ResponsePage() {
   const startDateString = dashboardData?.startDate;
   const endDateString = dashboardData?.endDate;
 
-  const timeSlotData = useMemo<TimeSlotData[]>(() => {
-    if (!startDateString || !endDateString) return [];
+  const timeSlotData = useMemo(() => generateTimeSlots(startDateString || '', endDateString || ''), [startDateString, endDateString]);
 
-    const startDate = new Date(startDateString);
-    const endDate = new Date(endDateString);
-
-    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
-      return [];
-    }
-
-    const dates: string[] = [];
-    const current = new Date(startDate);
-    current.setHours(0, 0, 0, 0);
-
-    const end = new Date(endDate);
-    end.setHours(0, 0, 0, 0);
-
-    while (current <= end) {
-      const dayOfWeek = current.getDay();
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        dates.push(current.toISOString());
-      }
-      current.setDate(current.getDate() + 1);
-    }
-
-    return dates.map((date) => {
-      const slots: string[] = [];
-
-      for (let hour = 9; hour < 18; hour++) {
-        if (hour === 12) continue;
-
-        for (let minute = 0; minute < 60; minute += 30) {
-          const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-          const slotDate = new Date(date);
-          slotDate.setHours(hour, minute, 0, 0);
-          slots.push(`${slotDate.toISOString()}|${timeStr}`);
-        }
-      }
-
-      return { date, slots };
-    });
-  }, [startDateString, endDateString]);
-
-  const isBlockedSlot = (date: string, time: string): boolean => {
-    const hour = parseInt(time.split(':')[0]);
-    const dayOfWeek = new Date(date).getDay();
-    return hour === 12 || dayOfWeek === 0 || dayOfWeek === 6;
+  const isOrganizerUnavailable = (slotIso: string): boolean => {
+    if (!dashboardData?.organizerAvailableSlots) return false;
+    return !dashboardData.organizerAvailableSlots.includes(slotIso);
   };
 
   const getSlotStatus = (slotIso: string) => {
@@ -226,7 +183,7 @@ export default function ResponsePage() {
       setIsSubmitted(true);
     },
     onError: (error: Error) => {
-      alert(`제출 실패: ${error.message}`);
+      toast.error(`제출 실패: ${error.message}`);
     },
     onSettled: () => {
       setIsSubmitting(false);
@@ -235,7 +192,7 @@ export default function ResponsePage() {
 
   const handleSubmit = () => {
     if (Object.keys(slotSelections).length === 0) {
-      alert('최소 하나 이상의 시간을 선택해주세요.');
+      toast.error('최소 하나 이상의 시간을 선택해주세요.');
       return;
     }
 
@@ -400,7 +357,9 @@ export default function ResponsePage() {
                 const status = getSlotStatus(slotIso);
                 const isAvailable = status === 'available';
                 const isUnavailable = status === 'unavailable';
-                const isBlocked = isBlockedSlot(dateSlot.date, time);
+                const isHolidayBlocked = isBlockedSlot(dateSlot.date, time);
+                const isOrganizerBlocked = isOrganizerUnavailable(slotIso);
+                const isBlocked = isHolidayBlocked || isOrganizerBlocked;
                 const isUnselected = status === 'none';
 
                 return (
@@ -415,17 +374,22 @@ export default function ResponsePage() {
                         ? '3px solid #4caf50'
                         : isUnavailable
                           ? '3px solid #f44336'
-                          : '2px solid #e0e0e0',
+                          : isOrganizerBlocked
+                            ? '2px dashed #ff9800'
+                            : '2px solid #e0e0e0',
                       borderRadius: '8px',
                       backgroundColor: isAvailable
                         ? '#e8f5e9'
                         : isUnavailable
                           ? '#ffebee'
-                          : 'white',
-                      color: isAvailable ? '#2e7d32' : isUnavailable ? '#c62828' : '#333',
+                          : isOrganizerBlocked
+                            ? '#fff3e0'
+                            : 'white',
+                      color: isAvailable ? '#2e7d32' : isUnavailable ? '#c62828' : isOrganizerBlocked ? '#e65100' : '#333',
                       fontWeight: 'bold',
-                      opacity: isBlocked ? 0.4 : 1,
+                      opacity: isHolidayBlocked ? 0.4 : isOrganizerBlocked ? 0.6 : 1,
                       fontSize: '0.875rem',
+                      position: 'relative',
                     }}
                   >
                     {time}

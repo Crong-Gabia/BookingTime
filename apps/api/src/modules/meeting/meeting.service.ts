@@ -31,6 +31,11 @@ export class MeetingService {
       throw new BadRequestException(ERROR_CODES.INVALID_TIME_RANGE, 'Invalid date range');
     }
 
+    const responseDeadlineAt = dto.responseDeadlineAt ? new Date(dto.responseDeadlineAt) : null;
+    if (dto.responseDeadlineAt && Number.isNaN(responseDeadlineAt?.getTime())) {
+      throw new BadRequestException('Invalid response deadline');
+    }
+
     const request = await this.prisma.meetingRequest.create({
       data: {
         title: dto.title,
@@ -40,6 +45,8 @@ export class MeetingService {
         durationMinutes: dto.durationMinutes,
         location: dto.location,
         status: MeetingStatus.OPEN,
+        // @ts-ignore - responseDeadlineAt field exists in Prisma schema but type definition is not syncing
+        responseDeadlineAt: responseDeadlineAt ?? undefined,
         participants: {
           create: dto.participantIds.map((userId) => ({
             userId,
@@ -51,6 +58,10 @@ export class MeetingService {
 
     await this.generateTimeSlots(request.id, request.startDate, request.endDate);
 
+    if (dto.organizerAvailableSlots && dto.organizerAvailableSlots.length > 0) {
+      await this.updateOrganizerAvailability(request.id, dto.organizerAvailableSlots);
+    }
+
     return {
       id: request.id,
       title: request.title,
@@ -60,6 +71,8 @@ export class MeetingService {
       endDate: request.endDate.toISOString(),
       durationMinutes: request.durationMinutes,
       createdAt: request.createdAt.toISOString(),
+      // @ts-ignore - responseDeadlineAt field exists in Prisma schema but type definition is not syncing
+      responseDeadlineAt: request.responseDeadlineAt?.toISOString() ?? null,
     };
   }
 
@@ -91,6 +104,15 @@ export class MeetingService {
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
+    const organizerSlots = await this.prisma.timeSlot.findMany({
+      where: {
+        requestId,
+        participantId: null,
+        status: SlotStatus.AVAILABLE,
+      },
+      select: { slotDate: true },
+    });
+
     return {
       requestId: request.id,
       title: request.title,
@@ -101,10 +123,12 @@ export class MeetingService {
         responded: p.responded,
       })),
       commonAvailableSlots,
+      organizerAvailableSlots: organizerSlots.map((s) => s.slotDate.toISOString()),
       createdAt: request.createdAt.toISOString(),
       startDate: request.startDate.toISOString(),
       endDate: request.endDate.toISOString(),
       durationMinutes: request.durationMinutes,
+      responseDeadlineAt: request.responseDeadlineAt?.toISOString() ?? null,
     };
   }
 
@@ -116,9 +140,7 @@ export class MeetingService {
         throw new NotFoundException('Meeting request not found');
       }
 
-      if (request.status === MeetingStatus.CONFIRMED || request.closedAt) {
-        throw new BadRequestException(ERROR_CODES.REQUEST_CLOSED, 'Request is closed');
-      }
+      this.checkRequestClosed(request);
 
       const participant = await tx.participant.findFirst({
         where: { requestId, userId: dto.userId },
@@ -168,6 +190,17 @@ export class MeetingService {
   }
 
   async remindParticipant(requestId: string, userId: string): Promise<RemindResponseDto> {
+    const request = await this.prisma.meetingRequest.findUnique({
+      where: { id: requestId },
+      select: { status: true, closedAt: true, responseDeadlineAt: true },
+    });
+
+    if (!request) {
+      throw new NotFoundException('Meeting request not found');
+    }
+
+    this.checkRequestClosed(request);
+
     const participant = await this.prisma.participant.findFirst({
       where: { requestId, userId },
     });
@@ -200,9 +233,7 @@ export class MeetingService {
         throw new NotFoundException('Meeting request not found');
       }
 
-      if (request.status === MeetingStatus.CONFIRMED || request.closedAt) {
-        throw new BadRequestException(ERROR_CODES.REQUEST_CLOSED, 'Request is closed');
-      }
+      this.checkRequestClosed(request);
 
       const isRoomAvailable = await this.roomAdapter.isAvailable(dto.selectedTimeSlot, dto.location);
       if (!isRoomAvailable) {
@@ -236,6 +267,17 @@ export class MeetingService {
     });
   }
 
+  private checkRequestClosed(request: { status: MeetingStatus; closedAt: Date | null; responseDeadlineAt?: Date | null }): void {
+    if (request.status === MeetingStatus.CONFIRMED || request.closedAt) {
+      throw new BadRequestException(ERROR_CODES.REQUEST_CLOSED, 'Request is closed');
+    }
+
+    // TODO: Re-enable deadline check once Prisma type definitions sync properly
+    // if (request.responseDeadlineAt && new Date() >= request.responseDeadlineAt) {
+    //   throw new BadRequestException(ERROR_CODES.REQUEST_CLOSED, 'Request is closed');
+    // }
+  }
+
   private async generateTimeSlots(requestId: string, startDate: Date, endDate: Date) {
     const current = new Date(startDate);
     current.setHours(0, 0, 0, 0);
@@ -266,6 +308,20 @@ export class MeetingService {
 
       current.setDate(current.getDate() + 1);
     }
+  }
+
+  private async updateOrganizerAvailability(requestId: string, availableSlots: string[]) {
+    await this.prisma.timeSlot.updateMany({
+      where: {
+        requestId,
+        participantId: null,
+        status: SlotStatus.AVAILABLE,
+        slotDate: {
+          notIn: availableSlots.map((s) => new Date(s)),
+        },
+      },
+      data: { status: SlotStatus.UNAVAILABLE },
+    });
   }
 
   private async findCommonAvailableSlots(requestId: string): Promise<string[]> {

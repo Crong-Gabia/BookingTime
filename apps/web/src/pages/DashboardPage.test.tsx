@@ -66,8 +66,17 @@ describe('DashboardPage', () => {
       title: '팀 회의',
       status: 'OPEN',
       participants: [{ userId: 'user-1', name: '홍길동', responded: true }],
-      commonAvailableSlots: ['2026-01-20T09:00:00Z'],
+      commonAvailableSlots: [
+        {
+          date: '2026-01-20',
+          times: ['2026-01-20T09:00:00.000Z'],
+        },
+      ],
+      organizerAvailableSlots: ['2026-01-20T09:00:00.000Z'],
       createdAt: '2026-01-13T00:00:00Z',
+      startDate: '2026-01-20T00:00:00.000Z',
+      endDate: '2026-01-21T00:00:00.000Z',
+      durationMinutes: 60,
     };
 
     fetchMock.mockResolvedValue(okJsonResponse(mockData));

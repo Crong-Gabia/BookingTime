@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, IconButton, Typography, Box, Button, TextField, Container, MenuItem } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useToast } from '@/hooks/useToast';
 
 interface ParticipantInput {
   email: string;
@@ -16,8 +17,11 @@ const DURATION_OPTIONS = [
   { value: 180, label: '3시간' },
 ];
 
+type ResponseDeadlineType = 'none' | 'today_18' | 'tomorrow_18' | 'custom';
+
 export default function CreatePage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [participants, setParticipants] = useState<ParticipantInput[]>([
@@ -26,7 +30,34 @@ export default function CreatePage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [durationMinutes, setDurationMinutes] = useState(60);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [responseDeadlineType, setResponseDeadlineType] = useState<ResponseDeadlineType>('none');
+  const [customDeadline, setCustomDeadline] = useState('');
+
+  const getToday18ISO = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 0, 0);
+    return today.toISOString();
+  };
+
+  const getTomorrow18ISO = () => {
+    const now = new Date();
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 18, 0, 0);
+    return tomorrow.toISOString();
+  };
+
+  const getResponseDeadlineISO = (): string | null => {
+    switch (responseDeadlineType) {
+      case 'today_18':
+        return getToday18ISO();
+      case 'tomorrow_18':
+        return getTomorrow18ISO();
+      case 'custom':
+        return customDeadline ? new Date(customDeadline).toISOString() : null;
+      case 'none':
+      default:
+        return null;
+    }
+  };
 
   const handleAddParticipant = () => {
     setParticipants([...participants, { email: '', name: '' }]);
@@ -44,47 +75,46 @@ export default function CreatePage() {
     setParticipants(updated);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!title || !startDate || !endDate) {
-      alert('필수 정보를 모두 입력해주세요.');
+      toast.error('필수 정보를 모두 입력해주세요.');
       return;
     }
 
     const validParticipants = participants.filter((p) => p.email && p.name);
     if (validParticipants.length === 0) {
-      alert('최소 1명 이상의 참석자를 입력해주세요.');
+      toast.error('최소 1명 이상의 참석자를 입력해주세요.');
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const response = await fetch('/api/meetings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          description,
-          organizerId: 'organizer-1',
-          participantIds: validParticipants.map((p) => p.email),
-          startDate,
-          endDate,
-          durationMinutes,
-        }),
-      });
+    const responseDeadlineAt = getResponseDeadlineISO();
 
-      if (!response.ok) {
-        throw new Error('Failed to create meeting');
+    if (responseDeadlineAt) {
+      const deadlineDate = new Date(responseDeadlineAt);
+      const now = new Date();
+
+      if (deadlineDate <= now) {
+        toast.error('응답 마감 기한은 현재 시간 이후여야 합니다.');
+        return;
       }
-
-      const data = await response.json();
-
-      alert(`회의 요청이 생성되었습니다!\n\n대시보드 링크:\n${window.location.origin}/requests/${data.id}/dashboard`);
-      navigate(`/requests/${data.id}/dashboard`);
-    } catch (_error) {
-      alert('회의 요청 생성에 실패했습니다.');
-    } finally {
-      setIsSubmitting(false);
     }
+
+    const meetingData = {
+      title,
+      description,
+      organizerId: 'organizer-1',
+      participantIds: validParticipants.map((p) => p.email),
+      requiredParticipantIds: [],
+      startDate,
+      endDate,
+      durationMinutes,
+      location: '',
+      responseDeadlineAt,
+    };
+
+      navigate('/requests/new/slots', {
+        state: { meetingData },
+      });
   };
 
   return (
@@ -108,7 +138,6 @@ export default function CreatePage() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="예: 팀 주간회의"
           sx={{ mb: 3 }}
-          disabled={isSubmitting}
         />
 
         <TextField
@@ -120,7 +149,6 @@ export default function CreatePage() {
           multiline
           rows={3}
           sx={{ mb: 3 }}
-          disabled={isSubmitting}
         />
 
         <Typography variant="subtitle1" gutterBottom fontWeight="bold" sx={{ mb: 2 }}>
@@ -135,7 +163,6 @@ export default function CreatePage() {
                 value={participant.email}
                 onChange={(e) => handleParticipantChange(index, 'email', e.target.value)}
                 sx={{ flex: 1 }}
-                disabled={isSubmitting}
               />
               <TextField
                 type="text"
@@ -143,14 +170,12 @@ export default function CreatePage() {
                 value={participant.name}
                 onChange={(e) => handleParticipantChange(index, 'name', e.target.value)}
                 sx={{ flex: 1 }}
-                disabled={isSubmitting}
               />
               {participants.length > 1 && (
                 <Button
                   variant="contained"
                   color="error"
                   onClick={() => handleRemoveParticipant(index)}
-                  disabled={isSubmitting}
                 >
                   삭제
                 </Button>
@@ -161,7 +186,6 @@ export default function CreatePage() {
             variant="outlined"
             onClick={handleAddParticipant}
             startIcon={<span>+</span>}
-            disabled={isSubmitting}
           >
             참석자 추가
           </Button>
@@ -174,7 +198,6 @@ export default function CreatePage() {
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
-            disabled={isSubmitting}
           />
           <TextField
             type="date"
@@ -182,14 +205,12 @@ export default function CreatePage() {
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
-            disabled={isSubmitting}
           />
           <TextField
             select
             label="소요시간 *"
             value={durationMinutes}
             onChange={(e) => setDurationMinutes(Number(e.target.value))}
-            disabled={isSubmitting}
           >
             {DURATION_OPTIONS.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -199,15 +220,43 @@ export default function CreatePage() {
           </TextField>
         </Box>
 
+        <TextField
+          select
+          label="응답 마감 기한"
+          value={responseDeadlineType}
+          onChange={(e) => {
+            setResponseDeadlineType(e.target.value as ResponseDeadlineType);
+            setCustomDeadline('');
+          }}
+          fullWidth
+          sx={{ mb: 2 }}
+        >
+          <MenuItem value="none">없음(기본)</MenuItem>
+          <MenuItem value="today_18">오늘 18:00</MenuItem>
+          <MenuItem value="tomorrow_18">내일 18:00</MenuItem>
+          <MenuItem value="custom">직접 입력</MenuItem>
+        </TextField>
+
+        {responseDeadlineType === 'custom' && (
+          <TextField
+            type="datetime-local"
+            label="마감 기한 날짜 및 시간 *"
+            value={customDeadline}
+            onChange={(e) => setCustomDeadline(e.target.value)}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            sx={{ mb: 3 }}
+          />
+        )}
+
         <Button
           variant="contained"
           fullWidth
           size="large"
           onClick={handleSubmit}
-          disabled={isSubmitting}
           sx={{ mb: 2 }}
         >
-          {isSubmitting ? '생성 중...' : '회의 요청 생성'}
+          다음: 시간 선택
         </Button>
 
         <Box sx={{ p: 2, backgroundColor: 'grey.100', borderRadius: 1 }}>

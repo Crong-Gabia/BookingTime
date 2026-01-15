@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import { checkHealth } from './health';
 
 describe('checkHealth', () => {
@@ -13,7 +13,7 @@ describe('checkHealth', () => {
       timestamp: '2026-01-13T10:00:00Z',
       uptime: 3600,
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => mockData,
     });
@@ -28,7 +28,7 @@ describe('checkHealth', () => {
 
   // 에러 케이스: fetch 실패 시 에러를 던져야 함
   it('fetch 실패 시 에러를 던져야 함', async () => {
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: false,
     });
 
@@ -37,7 +37,7 @@ describe('checkHealth', () => {
 
   // 네트워크 에러 처리
   it('네트워크 에러 발생 시 예외를 던져야 함', async () => {
-    (global.fetch as vi.Mock).mockRejectedValue(new Error('Network error'));
+    (global.fetch as Mock).mockRejectedValue(new Error('Network error'));
 
     await expect(checkHealth()).rejects.toThrow('Network error');
   });
@@ -49,7 +49,7 @@ describe('checkHealth', () => {
       timestamp: '2026-01-13T12:30:45Z',
       uptime: 86400,
     };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => mockData,
     });
@@ -63,7 +63,7 @@ describe('checkHealth', () => {
   // 엔드포인트 URL 검증
   it('올바른 엔드포인트를 호출해야 함', async () => {
     const mockData = { status: 'ok', timestamp: '2026-01-13T10:00:00Z', uptime: 100 };
-    (global.fetch as vi.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
       json: async () => mockData,
     });

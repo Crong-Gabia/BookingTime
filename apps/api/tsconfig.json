@@ -7,7 +7,9 @@
     "paths": {
       "@shared/*": ["../../packages/shared/dist"],
       "@shared/dto": ["../../packages/shared/dist/dto"]
-    }
+    },
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "references": [
     { "path": "../../packages/shared" }

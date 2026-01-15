@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ConfirmMeetingDto } from '@shared/dto';
 import { confirmMeeting, fetchDashboard, sendReminder } from '@/api';
+import { useToast } from '@/hooks/useToast';
 import ParticipantList from '@/components/participant-list';
 import CommonSlots from '@/components/common-slots';
 import RoomSelector from '@/components/room-selector';
@@ -22,6 +23,7 @@ export default function DashboardPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   const { data, error, isLoading } = useQuery({
     queryKey: ['dashboard', id],
@@ -36,25 +38,25 @@ export default function DashboardPage() {
     mutationFn: (userId: string) => sendReminder(id || '', userId),
     onSuccess: (result) => {
       if (result.sent) {
-        alert('독촉 알림을 보냈습니다.');
+        toast.success('독촉 알림을 보냈습니다.');
       } else {
-        alert('10분 내에 이미 알림을 보냈습니다.');
+        toast.info('10분 내에 이미 알림을 보냈습니다.');
       }
     },
     onError: () => {
-      alert('알림 전송에 실패했습니다.');
+      toast.error('알림 전송에 실패했습니다.');
     },
   });
 
   const confirmMutation = useMutation({
     mutationFn: (dto: ConfirmMeetingDto) => confirmMeeting(dto),
     onSuccess: () => {
-      alert('회의가 확정되었습니다!');
+      toast.success('회의가 확정되었습니다!');
       queryClient.invalidateQueries({ queryKey: ['dashboard', id] });
       navigate('/');
     },
     onError: (error: Error) => {
-      alert(`확정 실패: ${error.message}`);
+      toast.error(`확정 실패: ${error.message}`);
     },
   });
 
@@ -68,7 +70,7 @@ export default function DashboardPage() {
 
   const handleConfirm = async () => {
     if (!selectedTimeSlot) {
-      alert('확정할 시간을 선택해주세요.');
+      toast.error('확정할 시간을 선택해주세요.');
       return;
     }
 
@@ -83,10 +85,14 @@ export default function DashboardPage() {
     });
   };
 
-  const handleCopyLink = () => {
+  const handleCopyLink = async () => {
     const responseLink = `${window.location.origin}/requests/${id}/respond`;
-    navigator.clipboard.writeText(responseLink);
-    alert('응답 링크가 복사되었습니다!');
+    try {
+      await navigator.clipboard.writeText(responseLink);
+      toast.success('응답 링크가 복사되었습니다!');
+    } catch {
+      toast.error('링크 복사에 실패했습니다.');
+    }
   };
 
   const handleShare = async () => {
@@ -121,25 +127,19 @@ export default function DashboardPage() {
   if (!data) return null;
 
   const responseRate = data.participants.length > 0
-    ? Math.round((data.participants.filter((p) => p.responded).length / data.participants.length) * 100)
+    ? Math.round((data.participants.filter((p: { responded: boolean }) => p.responded).length / data.participants.length) * 100)
     : 0;
-  const respondedCount = data.participants.filter((p) => p.responded).length;
+  const respondedCount = data.participants.filter((p: { responded: boolean }) => p.responded).length;
   const totalCount = data.participants.length;
 
-  const participants = data.participants.map(p => ({
+  const participants = data.participants.map((p: { userId: string; name: string; responded: boolean }) => ({
     id: p.userId,
     name: p.name,
     department: '팀',
     status: p.responded ? 'responded' as const : 'pending' as const,
   }));
 
-  const commonSlots = data.commonAvailableSlots.map(slot => {
-    const date = new Date(slot);
-    return {
-      date: date.toISOString().split('T')[0],
-      times: [slot],
-    };
-  });
+  const commonSlots = data.commonAvailableSlots;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -211,7 +211,6 @@ export default function DashboardPage() {
             <ParticipantList
               participants={participants}
               onRemind={handleRemind}
-              isReminding={remindMutation.isPending}
             />
           </Grid>
 
@@ -223,8 +222,9 @@ export default function DashboardPage() {
             />
             <CommonSlots
               slots={commonSlots}
-              selectedSlot={selectedTimeSlot}
-              onSelect={setSelectedTimeSlot}
+              onSelectSlot={(_date: string, time: string) => {
+                setSelectedTimeSlot(time);
+              }}
             />
           </Grid>
 
@@ -237,7 +237,7 @@ export default function DashboardPage() {
             <RoomSelector
               rooms={mockRooms}
               selectedRoomId={selectedRoomId}
-              onSelect={setSelectedRoomId}
+              onChange={setSelectedRoomId}
             />
           </Grid>
 
