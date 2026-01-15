@@ -166,18 +166,17 @@ export default function ResponsePage() {
         }),
       });
 
+      const responseBody = await response.text();
+      const data = responseBody ? JSON.parse(responseBody) : null;
+
       if (!response.ok) {
-        let message = 'Failed to submit';
-        try {
-          const errorBody = await response.json();
-          if (errorBody?.message && typeof errorBody.message === 'string') {
-            message = errorBody.message;
-          }
-        } catch {}
-        throw new Error(message);
+        if (data && typeof data.message === 'string') {
+          throw new Error(data.message);
+        }
+        throw new Error('제출 실패');
       }
 
-      return response.json();
+      return data;
     },
     onSuccess: () => {
       setIsSubmitted(true);
