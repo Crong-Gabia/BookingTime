@@ -53,7 +53,7 @@ export default function OrganizerSlotSelectionPage() {
 
   useEffect(() => {
     if (!meetingData || !meetingData.title || !meetingData.startDate || !meetingData.endDate) {
-      toast.error('회의 정보가 없습니다. 다시 생성해주세요.');
+      toast.error('만남 정보가 없습니다. 다시 생성해주세요.');
       navigate('/new');
       return;
     }
@@ -128,10 +128,10 @@ export default function OrganizerSlotSelectionPage() {
       }
 
       const data = await response.json();
-      toast.success('회의 요청이 생성되었습니다!');
+      toast.success('만남 요청이 생성되었습니다!');
       navigate(`/requests/${data.id}/dashboard`);
     } catch {
-      toast.error('회의 요청 생성에 실패했습니다.');
+      toast.error('만남 요청 생성에 실패했습니다.');
     } finally {
       setIsSubmitting(false);
     }
@@ -201,7 +201,7 @@ export default function OrganizerSlotSelectionPage() {
           가능한 시간 선택
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          회의를 진행할 수 있는 시간을 모두 선택해주세요.
+          만남을 진행할 수 있는 시간을 모두 선택해주세요.
         </Typography>
 
         <Grid container spacing={2.5} sx={{ mb: 8 }}>
@@ -220,7 +220,7 @@ export default function OrganizerSlotSelectionPage() {
               }}
             >
               <Typography variant="subtitle1" fontWeight={600} gutterBottom sx={{ mb: 2 }}>
-                회의 정보
+                만남 정보
               </Typography>
               <Divider sx={{ mb: 2, borderColor: 'divider' }} />
 
@@ -532,7 +532,7 @@ export default function OrganizerSlotSelectionPage() {
               fontWeight: 600,
             }}
           >
-            {isSubmitting ? '생성 중...' : `회의 생성 (${Object.keys(selectedSlots).length}개 선택)`}
+            {isSubmitting ? '생성 중...' : `만남 생성 (${Object.keys(selectedSlots).length}개 선택)`}
           </Button>
         </Container>
       </Box>

@@ -270,15 +270,15 @@ export default function ResponsePage() {
           <IconButton onClick={() => navigate('/')} color="inherit">
             <ArrowBackIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-            회의 일정 응답
-          </Typography>
+            <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+              만남 일정 응답
+            </Typography>
         </Toolbar>
       </AppBar>
 
       <Box sx={{ padding: '1rem', paddingBottom: '8rem', flex: 1 }}>
         <Typography variant="h4" gutterBottom fontWeight={600}>
-          회의 일정 응답
+          만남 일정 응답
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ marginBottom: '1.5rem' }}>
           가능한 시간을 선택하세요 (불가능한 시간은 자동으로 표시됩니다)

@@ -96,11 +96,11 @@ describe('HomePage', () => {
     renderWithProviders(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText('WhatTime')).toBeInTheDocument();
+      expect(screen.getByText('우리지금만나')).toBeInTheDocument();
     });
   });
 
-  it('진행 중인 회의가 없으면 메시지가 표시되어야 한다', async () => {
+  it('진행 중인 만남이 없으면 메시지가 표시되어야 한다', async () => {
     const health: HealthPayload = { status: 'ok', timestamp: '2026-01-13T00:00:00Z', uptime: 100 };
     const meetings: MeetingsPayload = { meetings: [] };
 
@@ -118,11 +118,11 @@ describe('HomePage', () => {
     renderWithProviders(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText('진행 중인 회의가 없습니다.')).toBeInTheDocument();
+      expect(screen.getByText('진행 중인 만남이 없습니다.')).toBeInTheDocument();
     });
   });
 
-  it('완료된 회의가 없으면 메시지가 표시되어야 한다', async () => {
+  it('완료된 만남이 없으면 메시지가 표시되어야 한다', async () => {
     const health: HealthPayload = { status: 'ok', timestamp: '2026-01-13T00:00:00Z', uptime: 100 };
     const meetings: MeetingsPayload = { meetings: [] };
 
@@ -140,7 +140,7 @@ describe('HomePage', () => {
     renderWithProviders(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText('완료된 회의가 없습니다.')).toBeInTheDocument();
+      expect(screen.getByText('완료된 만남이 없습니다.')).toBeInTheDocument();
     });
   });
 });

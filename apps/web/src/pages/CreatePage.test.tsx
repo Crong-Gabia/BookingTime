@@ -34,7 +34,7 @@ describe('CreatePage', () => {
 
   it('제목이 올바르게 표시되어야 한다', () => {
     renderWithProviders(<CreatePage />);
-    expect(screen.getByText('새 회의 일정 만들기')).toBeInTheDocument();
+    expect(screen.getByText('새 만남 일정 만들기')).toBeInTheDocument();
   });
 
   it('제목 입력 필드가 있어야 한다', () => {
@@ -81,7 +81,7 @@ describe('CreatePage', () => {
   it('제목을 입력할 수 있어야 한다', () => {
     renderWithProviders(<CreatePage />);
     const input = screen.getByLabelText('제목 *');
-    fireEvent.change(input, { target: { value: '팀 회의' } });
-    expect(input).toHaveValue('팀 회의');
+    fireEvent.change(input, { target: { value: '팀 정기만남' } });
+    expect(input).toHaveValue('팀 정기만남');
   });
 });

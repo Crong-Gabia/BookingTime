@@ -14,9 +14,9 @@ import ShareIcon from '@mui/icons-material/Share';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const mockRooms = [
-  { id: '1', name: '1층 회의실 A', capacity: 10 },
-  { id: '2', name: '1층 회의실 B', capacity: 8 },
-  { id: '3', name: '2층 대회의실', capacity: 20 },
+  { id: '1', name: '1층 공간 A', capacity: 10 },
+  { id: '2', name: '1층 공간 B', capacity: 8 },
+  { id: '3', name: '2층 대공간', capacity: 20 },
 ];
 
 export default function DashboardPage() {
@@ -51,7 +51,7 @@ export default function DashboardPage() {
   const confirmMutation = useMutation({
     mutationFn: (dto: ConfirmMeetingDto) => confirmMeeting(dto),
     onSuccess: () => {
-      toast.success('회의가 확정되었습니다!');
+      toast.success('만남이 확정되었습니다!');
       queryClient.invalidateQueries({ queryKey: ['dashboard', id] });
       navigate('/');
     },
@@ -100,8 +100,8 @@ export default function DashboardPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: data?.title || '회의 일정',
-          text: `${data?.title || '회의 일정'}에 참석해주세요.`,
+          title: data?.title || '만남 일정',
+          text: `${data?.title || '만남 일정'}에 참석해주세요.`,
           url: responseLink,
         });
       } catch (_error) {
@@ -231,8 +231,8 @@ export default function DashboardPage() {
           {/* Room Selection */}
           <Grid item xs={12}>
             <SectionHeader
-              title="회의실 선택"
-              subtitle="확정할 시간을 선택한 후 회의실을 선택하세요"
+          title="공간 선택"
+          subtitle="확정할 시간을 선택한 후 공간을 선택하세요"
             />
             <RoomSelector
               rooms={mockRooms}
@@ -257,7 +257,7 @@ export default function DashboardPage() {
                 disabled={!selectedTimeSlot || !selectedRoomId || confirmMutation.isPending}
                 startIcon={<ShareIcon />}
               >
-                {confirmMutation.isPending ? '확정 중...' : '회의 확정'}
+                {confirmMutation.isPending ? '확정 중...' : '만남 확정'}
               </Button>
             </Box>
           </Grid>
