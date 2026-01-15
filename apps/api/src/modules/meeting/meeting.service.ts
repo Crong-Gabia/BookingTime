@@ -13,7 +13,7 @@ import {
   MeetingType,
   MealTime,
 } from 'shared';
-import { MeetingStatus, SlotStatus } from '@prisma/client';
+import { MeetingStatus, SlotStatus, MeetingType as PrismaMeetingType, MealTime as PrismaMealTime } from '@prisma/client';
 import { IRoomAdapter, IHolidayAdapter, IHrAdapter } from './adapters/interfaces';
 
 @Injectable()
@@ -49,6 +49,9 @@ export class MeetingService {
       throw new BadRequestException('mealTime is only allowed for company dinner');
     }
 
+    const prismaMeetingType = this.toPrismaMeetingType(meetingType);
+    const prismaMealTime = this.toPrismaMealTime(mealTime);
+
     const request = await this.prisma.meetingRequest.create({
       data: {
         title: dto.title,
@@ -57,8 +60,8 @@ export class MeetingService {
         endDate,
         durationMinutes: dto.durationMinutes,
         location: dto.location,
-        meetingType,
-        mealTime,
+        meetingType: prismaMeetingType,
+        mealTime: prismaMealTime,
         status: MeetingStatus.OPEN,
         responseDeadlineAt: responseDeadlineAt ?? undefined,
         participants: {
@@ -67,7 +70,7 @@ export class MeetingService {
             name: this.hrAdapter.getUserName(userId),
           })),
         },
-      } as unknown as Parameters<typeof this.prisma.meetingRequest.create>[0]['data'],
+      },
     });
 
     await this.generateTimeSlots(request.id, request.startDate, request.endDate);
@@ -86,8 +89,8 @@ export class MeetingService {
       durationMinutes: request.durationMinutes,
       createdAt: request.createdAt.toISOString(),
       responseDeadlineAt: request.responseDeadlineAt?.toISOString() ?? null,
-      meetingType,
-      mealTime,
+      meetingType: this.toSharedMeetingType(request.meetingType),
+      mealTime: this.toSharedMealTime(request.mealTime),
     };
   }
 
@@ -128,8 +131,8 @@ export class MeetingService {
       select: { slotDate: true },
     });
 
-    const meetingTypeValue = (request as { meetingType?: MeetingType }).meetingType ?? MeetingType.GENERAL;
-    const mealTimeValue = (request as { mealTime?: MealTime | null }).mealTime ?? null;
+    const meetingTypeValue = this.toSharedMeetingType(request.meetingType);
+    const mealTimeValue = this.toSharedMealTime(request.mealTime);
 
     return {
       requestId: request.id,
@@ -413,6 +416,24 @@ export class MeetingService {
     return `${requestId}-${participantId}-${slotDate}`;
   }
 
+  private toPrismaMeetingType(meetingType: MeetingType): PrismaMeetingType {
+    return meetingType === MeetingType.COMPANY_DINNER ? PrismaMeetingType.COMPANY_DINNER : PrismaMeetingType.GENERAL;
+  }
+
+  private toPrismaMealTime(mealTime: MealTime | null): PrismaMealTime | null {
+    if (!mealTime) return null;
+    return mealTime === MealTime.LUNCH ? PrismaMealTime.LUNCH : PrismaMealTime.DINNER;
+  }
+
+  private toSharedMeetingType(meetingType: PrismaMeetingType): MeetingType {
+    return meetingType === PrismaMeetingType.COMPANY_DINNER ? MeetingType.COMPANY_DINNER : MeetingType.GENERAL;
+  }
+
+  private toSharedMealTime(mealTime: PrismaMealTime | null): MealTime | null {
+    if (!mealTime) return null;
+    return mealTime === PrismaMealTime.LUNCH ? MealTime.LUNCH : MealTime.DINNER;
+  }
+
   async getAllMeetings(): Promise<{ meetings: Array<{ id: string; title: string; status: string; responseRate: number; createdAt: string; meetingType: MeetingType; mealTime?: MealTime | null }> }> {
     if (!process.env.DATABASE_URL) {
       return {
@@ -451,8 +472,8 @@ export class MeetingService {
           status: req.status,
           responseRate,
           createdAt: req.createdAt.toISOString(),
-          meetingType: (req as { meetingType?: MeetingType }).meetingType ?? MeetingType.GENERAL,
-          mealTime: (req as { mealTime?: MealTime | null }).mealTime ?? null,
+          meetingType: this.toSharedMeetingType(req.meetingType),
+          mealTime: this.toSharedMealTime(req.mealTime),
         };
       });
 

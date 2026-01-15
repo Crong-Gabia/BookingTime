@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/useToast';
@@ -83,17 +83,13 @@ export default function ResponsePage() {
     },
   });
 
-  const participants = dashboardData?.participants ?? [];
-  const [selectedUserId, setSelectedUserId] = useState<string>('');
+const participants = useMemo(() => dashboardData?.participants ?? [], [dashboardData?.participants]);
+const [selectedUserId, setSelectedUserId] = useState<string>('');
 
-  useEffect(() => {
-    if (participants.length === 0) return;
+const defaultParticipant = participants[0];
+const effectiveSelectedUserId = selectedUserId || defaultParticipant?.userId || '';
+const effectiveName = name || defaultParticipant?.name || '';
 
-    /* eslint-disable react-hooks/set-state-in-effect */
-    setSelectedUserId((prev) => prev || participants[0].userId);
-    setName((prev) => prev || participants[0].name);
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, [participants]);
 
   const startDateString = dashboardData?.startDate;
   const endDateString = dashboardData?.endDate;
@@ -168,16 +164,16 @@ export default function ResponsePage() {
 
   const submitMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedUserId) {
+      if (!effectiveSelectedUserId) {
         throw new Error('참여자를 선택해주세요.');
       }
 
-      const selectedParticipant = participants.find((p) => p.userId === selectedUserId);
+      const selectedParticipant = participants.find((p) => p.userId === effectiveSelectedUserId);
       if (!selectedParticipant) {
         throw new Error('참여자를 다시 선택해주세요.');
       }
 
-      const participantName = name || selectedParticipant.name;
+      const participantName = effectiveName || selectedParticipant.name;
       if (!participantName) {
         throw new Error('이름을 입력해주세요.');
       }
@@ -186,7 +182,7 @@ export default function ResponsePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: selectedUserId,
+          userId: effectiveSelectedUserId,
           name: participantName,
           availableSlots: Object.entries(slotSelections)
             .filter(([, status]) => status === 'available')
@@ -305,7 +301,7 @@ export default function ResponsePage() {
               <InputLabel id="participant-select-label">참여자</InputLabel>
               <Select
                 labelId="participant-select-label"
-                value={selectedUserId}
+                value={effectiveSelectedUserId}
                 label="참여자"
                 onChange={(e) => {
                   const userId = String(e.target.value);
@@ -332,7 +328,7 @@ export default function ResponsePage() {
           </Typography>
           <input
             type="text"
-            value={name}
+            value={effectiveName}
             onChange={(e) => setName(e.target.value)}
             placeholder="홍길동"
             disabled={isSubmitting}

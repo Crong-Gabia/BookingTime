@@ -62,7 +62,7 @@ export default function OrganizerSlotSelectionPage() {
     return hours * 60 + minutes;
   };
 
-  const getMealTimeRange = (value: typeof mealTime) => {
+  const getMealTimeRange = useCallback((value: typeof mealTime) => {
     if (value === 'lunch') {
       return { start: 12 * 60, end: 13 * 60 };
     }
@@ -72,9 +72,9 @@ export default function OrganizerSlotSelectionPage() {
     }
 
     return null;
-  };
+  }, []);
 
-  const filterSlotsForMealTime = (slots: string[]) => {
+  const filterSlotsForMealTime = useCallback((slots: string[]) => {
     if (meetingType !== 'company_dinner' || !mealTime) {
       return slots;
     }
@@ -90,7 +90,7 @@ export default function OrganizerSlotSelectionPage() {
       const minutes = toMinutes(time);
       return minutes >= range.start && minutes < range.end;
     });
-  };
+  }, [meetingType, mealTime, getMealTimeRange]);
 
   const buildTimeSlotData = useCallback(() => {
     const baseSlots = generateTimeSlots(meetingData?.startDate || '', meetingData?.endDate || '');
@@ -105,7 +105,7 @@ export default function OrganizerSlotSelectionPage() {
         slots: filterSlotsForMealTime(dateSlot.slots),
       }))
       .filter((dateSlot) => dateSlot.slots.length > 0);
-  }, [meetingData?.startDate, meetingData?.endDate, meetingType, mealTime, filterSlotsForMealTime]);
+  }, [meetingData?.startDate, meetingData?.endDate, meetingType, filterSlotsForMealTime]);
 
   useEffect(() => {
     if (!meetingData || !meetingData.title || !meetingData.startDate || !meetingData.endDate) {
