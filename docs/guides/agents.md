@@ -35,6 +35,7 @@ opencode auth login
 
 ### 브랜치 전략
 - **기준 브랜치**: `develop` (최종 병합 목표)
+- **용어**: 채팅/요청에서 `dev`는 항상 `develop` 의미
 - **기능 브랜치**: `feature/기능명` 형태
 - **절대 main에 직접 push 금지**
 
