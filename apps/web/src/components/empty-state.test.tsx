@@ -64,13 +64,13 @@ describe('EmptyState', () => {
     const action = <button type="button">일정 추가</button>;
     render(
       <EmptyState
-        message="아직 회의 일정이 없습니다"
+        message="아직 만남 일정이 없습니다"
         action={action}
       />,
     );
 
     const icon = document.querySelector('svg');
-    const message = screen.getByText('아직 회의 일정이 없습니다');
+    const message = screen.getByText('아직 만남 일정이 없습니다');
     const button = screen.getByRole('button', { name: '일정 추가' });
 
     expect(icon).toBeInTheDocument();

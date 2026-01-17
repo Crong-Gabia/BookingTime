@@ -63,7 +63,7 @@ describe('DashboardPage', () => {
   it('데이터 로드 후 제목이 표시되어야 한다', async () => {
     const mockData = {
       requestId: 'req-1',
-      title: '팀 회의',
+      title: '팀 만남',
       status: 'OPEN',
       participants: [{ userId: 'user-1', name: '홍길동', responded: true }],
       commonAvailableSlots: [
@@ -84,7 +84,7 @@ describe('DashboardPage', () => {
     renderWithProviders(<DashboardPage />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: '팀 회의' })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: '팀 만남' })).toBeInTheDocument();
     });
   });
 });

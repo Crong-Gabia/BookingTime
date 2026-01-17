@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MeetingService } from './meeting.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { IRoomAdapter, IHolidayAdapter, IHrAdapter } from './adapters/interfaces';
-import { CreateMeetingRequestDto, MeetingRequestStatus } from 'shared';
+import { CreateMeetingRequestDto } from 'shared';
 
 describe('MeetingService', () => {
   let service: MeetingService;
@@ -260,6 +260,7 @@ class HolidayAdapterMock implements IHolidayAdapter {
 
 class HrAdapterMock implements IHrAdapter {
   getUserName(_userId: string): string {
+    void _userId;
     return 'Test User';
   }
 }

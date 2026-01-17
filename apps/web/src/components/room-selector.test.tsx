@@ -5,12 +5,12 @@ import RoomSelector from './room-selector';
 
 describe('RoomSelector', () => {
   const mockRooms = [
-    { id: 'room-1', name: '회의실 A', capacity: 10 },
-    { id: 'room-2', name: '회의실 B', capacity: 20 },
-    { id: 'room-3', name: '회의실 C', capacity: 8 },
+    { id: 'room-1', name: '공간 A', capacity: 10 },
+    { id: 'room-2', name: '공간 B', capacity: 20 },
+    { id: 'room-3', name: '공간 C', capacity: 8 },
   ];
 
-  it('모든 회의실 옵션을 올바르게 렌더링해야 함', async () => {
+  it('모든 공간 옵션을 올바르게 렌더링해야 함', async () => {
     const user = userEvent.setup();
 
     render(
@@ -24,12 +24,12 @@ describe('RoomSelector', () => {
     const select = screen.getByRole('combobox');
     await user.click(select);
 
-    expect(screen.getByText('회의실 A (최대 10인)')).toBeInTheDocument();
-    expect(screen.getByText('회의실 B (최대 20인)')).toBeInTheDocument();
-    expect(screen.getByText('회의실 C (최대 8인)')).toBeInTheDocument();
+    expect(screen.getByText('공간 A (최대 10인)')).toBeInTheDocument();
+    expect(screen.getByText('공간 B (최대 20인)')).toBeInTheDocument();
+    expect(screen.getByText('공간 C (최대 8인)')).toBeInTheDocument();
   });
 
-  it('회의실 선택 시 onChange를 올바른 roomId로 호출해야 함', async () => {
+  it('공간 선택 시 onChange를 올바른 roomId로 호출해야 함', async () => {
     const user = userEvent.setup();
     const handleChange = vi.fn();
 
@@ -44,7 +44,7 @@ describe('RoomSelector', () => {
     const select = screen.getByRole('combobox');
     await user.click(select);
 
-    const option = screen.getByText('회의실 A (최대 10인)');
+    const option = screen.getByText('공간 A (최대 10인)');
     await user.click(option);
 
     expect(handleChange).toHaveBeenCalledWith('room-1');
@@ -73,10 +73,10 @@ describe('RoomSelector', () => {
       />,
     );
 
-    expect(screen.getByText('확정할 회의실을 선택하세요')).toBeInTheDocument();
+    expect(screen.getByText('확정할 공간을 선택하세요')).toBeInTheDocument();
   });
 
-  it('선택된 회의실이 올바르게 표시되어야 함', () => {
+  it('선택된 공간이 올바르게 표시되어야 함', () => {
     render(
       <RoomSelector
         rooms={mockRooms}
@@ -86,6 +86,6 @@ describe('RoomSelector', () => {
     );
 
     const select = screen.getByRole('combobox');
-    expect(select).toHaveTextContent('회의실 B');
+    expect(select).toHaveTextContent('공간 B');
   });
 });

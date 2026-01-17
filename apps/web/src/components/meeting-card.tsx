@@ -9,6 +9,8 @@ interface MeetingCardProps {
   responseRate: number;
   totalParticipants: number;
   respondedParticipants: number;
+  meetingType?: 'GENERAL' | 'COMPANY_DINNER';
+  mealTime?: 'LUNCH' | 'DINNER' | null;
   onClick: () => void;
 }
 
@@ -18,6 +20,8 @@ export default function MeetingCard({
   responseRate,
   totalParticipants,
   respondedParticipants,
+  meetingType,
+  mealTime,
   onClick,
 }: MeetingCardProps) {
   return (
@@ -39,6 +43,18 @@ export default function MeetingCard({
         <Typography variant="body2" color="text.secondary" gutterBottom>
           {date}
         </Typography>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+          {meetingType && (
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+              {meetingType === 'COMPANY_DINNER' ? '회식' : '일반'}
+            </Typography>
+          )}
+          {mealTime && (
+            <Typography variant="caption" color="text.secondary">
+              {mealTime === 'LUNCH' ? '점심 12~13시' : '저녁 18~20시'}
+            </Typography>
+          )}
+        </Box>
         <Box sx={{ mt: 2 }}>
           <ProgressBar
             value={responseRate}

@@ -39,7 +39,7 @@ export default function HomePage() {
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
         <Typography variant="h4" gutterBottom>
-          WhatTime - 회의 예약 시스템
+          우리지금만나 - 만남 예약 시스템
         </Typography>
         <Typography color="error">서버 연결 실패</Typography>
       </Box>
@@ -50,7 +50,7 @@ export default function HomePage() {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" fontWeight={600}>
-          WhatTime
+          우리지금만나
         </Typography>
       </Box>
 
@@ -65,18 +65,18 @@ export default function HomePage() {
             onClick={() => navigate('/requests/new')}
             startIcon={<span>+</span>}
           >
-            새 회의 일정 만들기
+            새 만남 일정 만들기
           </Button>
         </Box>
       </Box>
       )}
 
       <Typography variant="h6" gutterBottom fontWeight={600}>
-        진행 중인 회의
+        진행 중인 만남
       </Typography>
       {activeMeetings.length === 0 ? (
         <Typography color="text.secondary" sx={{ mb: 4 }}>
-          진행 중인 회의가 없습니다.
+          진행 중인 만남이 없습니다.
         </Typography>
       ) : (
         <Grid container spacing={2} sx={{ mb: 4 }}>
@@ -88,6 +88,8 @@ export default function HomePage() {
                 responseRate={meeting.responseRate}
                 totalParticipants={5}
                 respondedParticipants={Math.round(5 * meeting.responseRate / 100)}
+                meetingType={meeting.meetingType}
+                mealTime={meeting.mealTime}
                 onClick={() => navigate(`/requests/${meeting.id}/dashboard`)}
               />
             </Grid>
@@ -96,11 +98,11 @@ export default function HomePage() {
       )}
 
       <Typography variant="h6" gutterBottom fontWeight={600}>
-        완료된 회의
+        완료된 만남
       </Typography>
       {completedMeetings.length === 0 ? (
         <Typography color="text.secondary">
-          완료된 회의가 없습니다.
+          완료된 만남이 없습니다.
         </Typography>
       ) : (
         <Grid container spacing={2}>
@@ -112,6 +114,8 @@ export default function HomePage() {
                 responseRate={100}
                 totalParticipants={5}
                 respondedParticipants={5}
+                meetingType={meeting.meetingType}
+                mealTime={meeting.mealTime}
                 onClick={() => navigate(`/requests/${meeting.id}/dashboard`)}
               />
             </Grid>

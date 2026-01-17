@@ -22,6 +22,10 @@ export async function createMeeting(payload: {
   endDate: string;
   participantIds: string[];
   organizerId: string;
+  meetingType?: 'GENERAL' | 'COMPANY_DINNER';
+  mealTime?: 'LUNCH' | 'DINNER' | null;
+  organizerAvailableSlots?: string[];
+  responseDeadlineAt?: string | null;
 }) {
   const response = await fetch('/api/meetings', {
     method: 'POST',
@@ -87,6 +91,8 @@ export type DashboardData = {
   title: string;
   description?: string;
   status: string;
+  meetingType: 'GENERAL' | 'COMPANY_DINNER';
+  mealTime?: 'LUNCH' | 'DINNER' | null;
   participants: Array<{
     userId: string;
     name: string;
@@ -100,6 +106,8 @@ export type DashboardData = {
   startDate: string;
   endDate: string;
   durationMinutes: number;
+  organizerAvailableSlots?: string[];
+  responseDeadlineAt?: string | null;
 };
 
 export type CreateMeetingRequestDto = {
@@ -110,6 +118,10 @@ export type CreateMeetingRequestDto = {
   endDate: string;
   participantIds: string[];
   organizerId: string;
+  meetingType?: 'GENERAL' | 'COMPANY_DINNER';
+  mealTime?: 'LUNCH' | 'DINNER' | null;
+  organizerAvailableSlots?: string[];
+  responseDeadlineAt?: string | null;
 };
 
 export type SubmitResponseDto = {

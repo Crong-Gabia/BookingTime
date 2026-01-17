@@ -8,24 +8,26 @@ datasource db {
 }
 
 model MeetingRequest {
-  id                String           @id @default(cuid())
-  title             String
-  organizerId       String
-  status            MeetingStatus    @default(DRAFT)
-  startDate         DateTime
-  endDate           DateTime
-  durationMinutes   Int
-  location          String?
-  version           Int              @default(1)
-  closedAt          DateTime?
+  id                 String           @id @default(cuid())
+  title              String
+  organizerId        String
+  status             MeetingStatus    @default(DRAFT)
+  startDate          DateTime
+  endDate            DateTime
+  durationMinutes    Int
+  location           String?
+  meetingType        MeetingType      @default(GENERAL)
+  mealTime           MealTime?
+  version            Int              @default(1)
+  closedAt           DateTime?
   responseDeadlineAt DateTime?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  deletedAt         DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  deletedAt          DateTime?
 
-  participants      Participant[]
-  confirmedMeeting  ConfirmedMeeting?
-  timeSlots         TimeSlot[]
+  participants       Participant[]
+  confirmedMeeting   ConfirmedMeeting?
+  timeSlots          TimeSlot[]
 
   @@index([status])
   @@index([createdAt])
@@ -96,4 +98,14 @@ enum SlotStatus {
   AVAILABLE
   UNAVAILABLE
   BLOCKED
+}
+
+enum MeetingType {
+  GENERAL
+  COMPANY_DINNER
+}
+
+enum MealTime {
+  LUNCH
+  DINNER
 }

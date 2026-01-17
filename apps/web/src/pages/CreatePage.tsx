@@ -32,6 +32,8 @@ export default function CreatePage() {
   const [durationMinutes, setDurationMinutes] = useState(60);
   const [responseDeadlineType, setResponseDeadlineType] = useState<ResponseDeadlineType>('none');
   const [customDeadline, setCustomDeadline] = useState('');
+  const [meetingType, setMeetingType] = useState<'general' | 'company_dinner'>('general');
+  const [mealTime, setMealTime] = useState<'lunch' | 'dinner' | ''>('');
 
   const getToday18ISO = () => {
     const now = new Date();
@@ -87,6 +89,11 @@ export default function CreatePage() {
       return;
     }
 
+    if (meetingType === 'company_dinner' && !mealTime) {
+      toast.error('회식인 경우 식사 시간을 선택해주세요.');
+      return;
+    }
+
     const responseDeadlineAt = getResponseDeadlineISO();
 
     if (responseDeadlineAt) {
@@ -110,6 +117,8 @@ export default function CreatePage() {
       durationMinutes,
       location: '',
       responseDeadlineAt,
+      meetingType,
+      mealTime,
     };
 
       navigate('/requests/new/slots', {
@@ -125,7 +134,7 @@ export default function CreatePage() {
             <ArrowBackIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-            새 회의 일정 만들기
+            새 만남 일정 만들기
           </Typography>
         </Toolbar>
       </AppBar>
@@ -136,7 +145,7 @@ export default function CreatePage() {
           label="제목 *"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="예: 팀 주간회의"
+          placeholder="예: 팀 주간 정기만남"
           sx={{ mb: 3 }}
         />
 
@@ -145,7 +154,7 @@ export default function CreatePage() {
           label="설명"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="회의에 대한 간단한 설명"
+          placeholder="만남에 대한 간단한 설명"
           multiline
           rows={3}
           sx={{ mb: 3 }}
@@ -189,6 +198,33 @@ export default function CreatePage() {
           >
             참석자 추가
           </Button>
+        </Box>
+
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mb: 3 }}>
+          <TextField
+            select
+            label="만남 종류"
+            value={meetingType}
+            onChange={(e) => {
+              setMeetingType(e.target.value as 'general' | 'company_dinner');
+              setMealTime('');
+            }}
+          >
+            <MenuItem value="general">일반</MenuItem>
+            <MenuItem value="company_dinner">회식</MenuItem>
+          </TextField>
+          {meetingType === 'company_dinner' && (
+            <TextField
+              select
+              label="식사 시간"
+              value={mealTime}
+              onChange={(e) => setMealTime(e.target.value as 'lunch' | 'dinner' | '')}
+              helperText="회식인 경우 점심/저녁 시간을 선택해주세요"
+            >
+              <MenuItem value="lunch">점심 12~13시</MenuItem>
+              <MenuItem value="dinner">저녁 18~20시</MenuItem>
+            </TextField>
+          )}
         </Box>
 
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
@@ -265,7 +301,7 @@ export default function CreatePage() {
           </Typography>
           <Typography variant="body2" component="div">
             <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
-              <li>회의 시간은 30분 단위로 생성됩니다.</li>
+              <li>만남 시간은 30분 단위로 생성됩니다.</li>
               <li>시간/요일 제한은 추후 옵션으로 제공할 수 있습니다.</li>
               <li>생성 후 대시보드에서 참석자들에게 응답 링크를 공유하세요.</li>
             </ul>

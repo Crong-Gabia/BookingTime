@@ -70,14 +70,14 @@ describe('SectionHeader', () => {
     const action = <button type="button">새로 만들기</button>;
     render(
       <SectionHeader
-        title="회의 목록"
-        subtitle="총 5개의 회의"
+        title="만남 목록"
+        subtitle="총 5개의 만남"
         action={action}
       />,
     );
 
-    expect(screen.getByRole('heading', { name: '회의 목록' })).toBeInTheDocument();
-    expect(screen.getByText('총 5개의 회의')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '만남 목록' })).toBeInTheDocument();
+    expect(screen.getByText('총 5개의 만남')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '새로 만들기' })).toBeInTheDocument();
   });
 });

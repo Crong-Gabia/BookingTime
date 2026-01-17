@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/useToast';
@@ -31,7 +31,7 @@ export default function ResponsePage() {
     if (!value) return null;
     try {
       return JSON.parse(value) as { message?: string } | null;
-    } catch (error) {
+    } catch {
       return null;
     }
   };
@@ -83,15 +83,13 @@ export default function ResponsePage() {
     },
   });
 
-  const participants = dashboardData?.participants ?? [];
-  const [selectedUserId, setSelectedUserId] = useState<string>('');
+const participants = useMemo(() => dashboardData?.participants ?? [], [dashboardData?.participants]);
+const [selectedUserId, setSelectedUserId] = useState<string>('');
 
-  useEffect(() => {
-    if (!selectedUserId && participants.length > 0) {
-      setSelectedUserId(participants[0].userId);
-      setName(participants[0].name);
-    }
-  }, [participants, selectedUserId]);
+const defaultParticipant = participants[0];
+const effectiveSelectedUserId = selectedUserId || defaultParticipant?.userId || '';
+const effectiveName = name || defaultParticipant?.name || '';
+
 
   const startDateString = dashboardData?.startDate;
   const endDateString = dashboardData?.endDate;
@@ -166,16 +164,16 @@ export default function ResponsePage() {
 
   const submitMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedUserId) {
+      if (!effectiveSelectedUserId) {
         throw new Error('참여자를 선택해주세요.');
       }
 
-      const selectedParticipant = participants.find((p) => p.userId === selectedUserId);
+      const selectedParticipant = participants.find((p) => p.userId === effectiveSelectedUserId);
       if (!selectedParticipant) {
         throw new Error('참여자를 다시 선택해주세요.');
       }
 
-      const participantName = name || selectedParticipant.name;
+      const participantName = effectiveName || selectedParticipant.name;
       if (!participantName) {
         throw new Error('이름을 입력해주세요.');
       }
@@ -184,7 +182,7 @@ export default function ResponsePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: selectedUserId,
+          userId: effectiveSelectedUserId,
           name: participantName,
           availableSlots: Object.entries(slotSelections)
             .filter(([, status]) => status === 'available')
@@ -270,15 +268,15 @@ export default function ResponsePage() {
           <IconButton onClick={() => navigate('/')} color="inherit">
             <ArrowBackIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-            회의 일정 응답
-          </Typography>
+            <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+              만남 일정 응답
+            </Typography>
         </Toolbar>
       </AppBar>
 
       <Box sx={{ padding: '1rem', paddingBottom: '8rem', flex: 1 }}>
         <Typography variant="h4" gutterBottom fontWeight={600}>
-          회의 일정 응답
+          만남 일정 응답
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ marginBottom: '1.5rem' }}>
           가능한 시간을 선택하세요 (불가능한 시간은 자동으로 표시됩니다)
@@ -303,7 +301,7 @@ export default function ResponsePage() {
               <InputLabel id="participant-select-label">참여자</InputLabel>
               <Select
                 labelId="participant-select-label"
-                value={selectedUserId}
+                value={effectiveSelectedUserId}
                 label="참여자"
                 onChange={(e) => {
                   const userId = String(e.target.value);
@@ -330,7 +328,7 @@ export default function ResponsePage() {
           </Typography>
           <input
             type="text"
-            value={name}
+            value={effectiveName}
             onChange={(e) => setName(e.target.value)}
             placeholder="홍길동"
             disabled={isSubmitting}

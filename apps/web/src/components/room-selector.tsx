@@ -22,7 +22,7 @@ export default function RoomSelector({
   return (
     <Box sx={{ mb: 2 }}>
       <Typography variant="subtitle2" gutterBottom fontWeight={500}>
-        회의실 선택
+        공간 선택
       </Typography>
       <TextField
         select
@@ -30,7 +30,7 @@ export default function RoomSelector({
         value={selectedRoomId || ''}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        helperText="확정할 회의실을 선택하세요"
+        helperText="확정할 공간을 선택하세요"
       >
         <MenuItem value="">
           <em>선택 안함</em>

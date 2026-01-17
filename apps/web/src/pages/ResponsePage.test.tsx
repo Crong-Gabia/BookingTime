@@ -44,7 +44,7 @@ describe('ResponsePage', () => {
 
     const mockDashboard = {
       requestId: 'req-1',
-      title: '팀 회의',
+      title: '팀 만남',
       status: 'OPEN',
       participants: [{ userId: 'user-1', name: '홍길동', responded: false }],
       startDate: '2026-01-20',
@@ -62,7 +62,7 @@ describe('ResponsePage', () => {
 
   it('제목이 올바르게 표시되어야 한다', () => {
     renderWithProviders(<ResponsePage />);
-    expect(screen.getAllByText('회의 일정 응답')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('만남 일정 응답')[0]).toBeInTheDocument();
   });
 
   it('이름 입력 필드가 있어야 한다', () => {
