@@ -9,7 +9,10 @@
 - `.claude/rules/`: 파일 패턴 기반 조건부 규칙 (선택)
 - `docs/conventions/`: 상세 컨벤션 문서
 - `docs/context/`: 컨텍스트 전이 템플릿
+- `docs/setup/`: 설치/새 프로젝트 가이드
 - `templates/`: 백엔드/프론트/문서 AGENTS 템플릿
+- `work-history/product-spec/`: 기획서 업데이트 템플릿
+- `scaffold/`: 백엔드/프론트 레포 분리용 스캐폴드
 - `oh-my-opencode.json`: 에이전트/권한 설정 템플릿 (선택)
 
 ## 빠른 시작 (비개발자 포함)
@@ -18,6 +21,7 @@
 2) `docs/setup/oh-my-open-code-setup.md` 순서대로 설치/인증 진행
 3) 프로젝트 루트에서 `opencode` 실행 → `/init`으로 AGENTS 구조 생성
 4) `AGENTS.md`와 `docs/conventions/*`를 프로젝트 상황에 맞게 보정
+5) `work-history/product-spec/plan.md` 업데이트
 
 ## 사용
 
