@@ -1,7 +1,7 @@
 # Database Naming (Conventions)
 
 ## Tables
-- 복수형/단수형 중 하나로 통일
+- **복수형으로 통일**
 - snake_case
 
 ## Columns
@@ -9,9 +9,9 @@
 - PK: id
 - FK: {entity}_id
 
-## Timestamps
+## Soft Delete / Timestamps
 - created_at, updated_at
-- soft delete: deleted_at
+- soft delete: **is_deleted (boolean)** + **deleted_at (timestamp, optional)**
 
 ## Booleans
 - is_*, has_*
