@@ -27,3 +27,4 @@
 
 ## 참고 문서
 - `docs/setup/oh-my-open-code-setup.md`: Oh My Open Code 설치/인증 가이드
+- `docs/setup/new-project.md`: 새 프로젝트 생성 절차
