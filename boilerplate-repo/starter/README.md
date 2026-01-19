@@ -6,7 +6,6 @@
 ## 구성
 
 - `AGENTS.md`: 전역 운영 규칙 (단일 진실)
-- `.claude/rules/`: 파일 패턴 기반 조건부 규칙 (선택)
 - `docs/conventions/`: 상세 컨벤션 문서
 - `docs/context/`: 컨텍스트 전이 템플릿
 - `docs/setup/`: 설치/새 프로젝트 가이드
@@ -32,3 +31,4 @@
 ## 참고 문서
 - `docs/setup/oh-my-open-code-setup.md`: Oh My Open Code 설치/인증 가이드
 - `docs/setup/new-project.md`: 새 프로젝트 생성 절차
+- `docs/guidelines/README.md`: 개발 가이드 전체 목차
