@@ -1,37 +1,14 @@
-# Agent & Guideline Boilerplate
+# Boilerplate Repo
 
-새 프로젝트 시작 시 **컨텍스트 손실을 최소화**하기 위한 템플릿 레포입니다.
-비개발자 환경에서도 단계별로 진행할 수 있도록 설치/초기화 가이드를 포함합니다.
+이 레포는 템플릿 레포입니다.
 
-## 구성
+## 사용법
 
-- `AGENTS.md`: 전역 운영 규칙 (단일 진실)
-- `docs/conventions/`: 상세 컨벤션 문서
-- `docs/context/`: 컨텍스트 전이 템플릿
-- `docs/setup/`: 설치/새 프로젝트 가이드
-- `templates/`: 백엔드/프론트/문서 AGENTS 템플릿
-- `work-history/product-spec/`: 기획서 업데이트 템플릿
-- `scaffold/`: 백엔드/프론트 레포 분리용 스캐폴드
-- `starter/`: 전체 보일러플레이트 번들
-- `oh-my-opencode.json`: 에이전트/권한 설정 템플릿 (선택)
+새 프로젝트에는 **`starter/` 디렉터리의 내용만** 복사해서 사용합니다.
 
-## 빠른 시작 (비개발자 포함)
+권장 절차:
+1) 새 레포 생성
+2) `starter/*`를 새 레포 루트로 이동(펼치기)
+3) `starter/` 폴더 삭제
 
-1) 이 레포를 템플릿으로 생성하거나 다운로드
-2) `docs/setup/oh-my-open-code-setup.md` 순서대로 설치/인증 진행
-3) 프로젝트 루트에서 `opencode` 실행 → `/init`으로 AGENTS 구조 생성
-4) `AGENTS.md`와 `docs/conventions/*`를 프로젝트 상황에 맞게 보정
-5) `work-history/product-spec/plan.md` 업데이트
-
-## 사용
-
-1) 이 레포를 복사하거나 템플릿으로 생성
-2) 프로젝트 구조에 맞게 경로/글롭/권한 조정
-3) 루트 README에 AGENTS.md 링크 추가
-
-## 참고 문서
-- `docs/conventions/code-style.md`: Java/TypeScript 네이밍 규칙
-- `docs/conventions/backend-structure.md`: 백엔드 디렉터리 구조
-- `docs/conventions/eslint-example.json`: ESLint 예시
-- `docs/setup/oh-my-open-code-setup.md`: Oh My Open Code 설치/인증 가이드
-- `docs/setup/new-project.md`: 새 프로젝트 생성 절차
+`starter/` 내부에는 개발 시작에 필요한 문서/운영 규칙/기획 템플릿이 모두 포함되어 있습니다.

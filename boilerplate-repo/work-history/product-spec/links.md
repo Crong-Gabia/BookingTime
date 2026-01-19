@@ -1,5 +1,0 @@
-# Links
-
-- Confluence:
-- Figma:
-- Docs:
