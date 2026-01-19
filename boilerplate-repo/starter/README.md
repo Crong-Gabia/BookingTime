@@ -6,13 +6,13 @@
 ## 구성
 
 - `AGENTS.md`: 전역 운영 규칙 (단일 진실)
+- `.claude/rules/`: 파일 패턴 기반 조건부 규칙 (선택)
 - `docs/conventions/`: 상세 컨벤션 문서
 - `docs/context/`: 컨텍스트 전이 템플릿
 - `docs/setup/`: 설치/새 프로젝트 가이드
 - `templates/`: 백엔드/프론트/문서 AGENTS 템플릿
 - `work-history/product-spec/`: 기획서 업데이트 템플릿
 - `scaffold/`: 백엔드/프론트 레포 분리용 스캐폴드
-- `starter/`: 전체 보일러플레이트 번들
 - `oh-my-opencode.json`: 에이전트/권한 설정 템플릿 (선택)
 
 ## 빠른 시작 (비개발자 포함)
@@ -30,8 +30,5 @@
 3) 루트 README에 AGENTS.md 링크 추가
 
 ## 참고 문서
-- `docs/conventions/code-style.md`: Java/TypeScript 네이밍 규칙
-- `docs/conventions/backend-structure.md`: 백엔드 디렉터리 구조
-- `docs/conventions/eslint-example.json`: ESLint 예시
 - `docs/setup/oh-my-open-code-setup.md`: Oh My Open Code 설치/인증 가이드
 - `docs/setup/new-project.md`: 새 프로젝트 생성 절차

@@ -54,6 +54,7 @@ OpenCode 실행 후:
 - [ ] AGENTS.md: 전역 규칙/권한/보고 포맷 확인
 - [ ] docs/conventions: 코드/DB 컨벤션 업데이트
 - [ ] templates: backend/frontend AGENTS 템플릿 적용 여부 결정
+- [ ] .claude/rules: 조건부 규칙 사용 여부 결정 (사용하지 않으면 무시 가능)
 
 ---
 
@@ -69,3 +70,5 @@ OpenCode 실행 후:
 Q. Claude/ChatGPT/Gemini 구독이 없으면?
 - 설치 시 `--claude=no --chatgpt=no --gemini=no` 설정 가능
 
+Q. .claude/rules는 꼭 필요한가?
+- 아니오. 파일 패턴 기반 자동 규칙용이며 사용하지 않아도 됨

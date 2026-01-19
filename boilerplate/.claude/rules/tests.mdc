@@ -1,7 +1,0 @@
----
-globs: ["**/*test*.*", "**/*.spec.*", "**/*.test.*"]
-description: "Test file rules"
----
-- 테스트는 1 behavior = 1 case
-- 외부 의존성은 mock 처리
-- 비결정성(시간/네트워크) 금지
