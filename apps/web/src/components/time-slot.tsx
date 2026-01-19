@@ -1,4 +1,4 @@
-import { Button } from '@mui/material';
+import { Button, useTheme } from '@mui/material';
 
 type TimeSlotStatus = 'available' | 'unavailable' | 'blocked';
 
@@ -10,36 +10,37 @@ interface TimeSlotProps {
 }
 
 export default function TimeSlot({ time, status, onClick, blockedReason }: TimeSlotProps) {
+  const theme = useTheme();
   const isBlocked = status === 'blocked';
 
   const getStatusStyle = () => {
     switch (status) {
       case 'available':
         return {
-          backgroundColor: '#e8f5e9',
-          color: '#2e7d32',
-          border: '2px solid #4caf50',
+          backgroundColor: theme.palette.success.light,
+          color: theme.palette.success.dark,
+          border: `2px solid ${theme.palette.success.main}`,
         };
       case 'unavailable':
         return {
-          backgroundColor: '#ffcdd2',
-          color: '#d32f2f',
-          border: '2px solid #f44336',
+          backgroundColor: theme.palette.error.light,
+          color: theme.palette.error.dark,
+          border: `2px solid ${theme.palette.error.main}`,
           textDecoration: 'line-through',
         };
       case 'blocked':
         return {
-          backgroundColor: '#eeeeee',
-          color: '#9e9e9e',
-          border: '2px solid #e0e0e0',
+          backgroundColor: theme.palette.action.disabledBackground,
+          color: theme.palette.text.disabled,
+          border: `2px solid ${theme.palette.divider}`,
           opacity: 0.5,
           cursor: 'not-allowed',
         };
       default:
         return {
-          backgroundColor: '#ffffff',
-          color: '#000000',
-          border: '2px solid #ddd',
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+          border: `2px solid ${theme.palette.divider}`,
         };
     }
   };
@@ -66,7 +67,7 @@ export default function TimeSlot({ time, status, onClick, blockedReason }: TimeS
       <div>
         <div>{time}</div>
         {isBlocked && blockedReason && (
-          <div style={{ fontSize: '0.7rem', color: '#9e9e9e' }}>
+          <div style={{ fontSize: '0.7rem', color: theme.palette.text.disabled }}>
             {blockedReason}
           </div>
         )}

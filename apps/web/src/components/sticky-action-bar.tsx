@@ -21,7 +21,7 @@ export default function StickyActionBar({
         left: 0,
         right: 0,
         backgroundColor: 'background.paper',
-        boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+        boxShadow: 2,
         p: 2,
         zIndex: 1000,
       }}
