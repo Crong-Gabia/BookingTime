@@ -62,7 +62,7 @@
 
 ### Documentation
 - Mission: 문서 작성
-- Write Access: docs/ only
+- Write Access: docs/**
 - Output: 목차 + 변경 요약
 
 ### Multimodal Analysis

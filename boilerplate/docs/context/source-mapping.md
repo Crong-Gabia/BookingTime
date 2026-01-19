@@ -36,7 +36,7 @@
 > 기존 파일을 **이동하지 않고**, 외부 프로젝트로 옮길 때의 "목표 위치"를 제시한다.
 
 | 현재 위치(예시) | 분류 | 목표 위치(boilerplate 기준) | 비고 |
-|---|---|---|---|
+|:---|:---|:---|:---|
 | /AGENTS.md | 전역 운영 규칙 | /AGENTS.md | 단일 진실 유지 |
 | /docs/guides/agents.md | 전역 컨벤션 상세 | /docs/conventions/code-style.md | 상세 규칙만 이동 |
 | /guidelines/*.md | UI/FE 지침 | /docs/conventions/ (또는 frontend/AGENTS.md) | 프로젝트에 맞게 분리 |
