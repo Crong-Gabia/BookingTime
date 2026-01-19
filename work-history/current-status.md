@@ -93,7 +93,7 @@
 ### 5. 문서화 ✅
 
 #### 생성된 파일
-- `work-history/current-features.md` - 현재 구현된 기능 목록
+- `work-history/context/current.md` - (SSOT) 현재 컨텍스트/진행상황
 - `work-history/api-status.md` - API 연결 상태 및 이슈
 
 ---
@@ -177,6 +177,6 @@ a78846c feat: add navigation bars to all pages
 ## 참고
 
 - [PR #4](https://github.com/Crong-Gabia/BookingTime/pull/4)
-- [현재 기능 목록](./current-features.md)
+- [현재 컨텍스트(SSOT)](./context/current.md)
 - [API 상태](./api-status.md)
 - [배포 가이드](../docs/guides/08-deployment.md)

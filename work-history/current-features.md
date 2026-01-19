@@ -1,14 +1,17 @@
-# 현재 구현된 기능 목록
+# (DEPRECATED) 현재 구현된 기능 목록
 
-**최종 업데이트**: 2026-01-13
-**기준 브랜치**: `feature/navigation-bars`
+> 이 문서는 더 이상 유지하지 않습니다.
+> 
+> **Single Source of Truth**:
+> - `work-history/context/current.md`
+>
+> 이유: 이 파일은 특정 과거 브랜치 기준으로 작성되어 최신 develop 상태와 쉽게 불일치합니다.
 
 ---
 
-## 개요
+## Legacy Content (참고용)
 
-현재 BookingTime 프로젝트에서 구현되어 있는 모든 기능 목록입니다.
-페이지별로 나누어 기능을 상세히 설명합니다.
+아래 내용은 과거 기록으로만 참고하세요.
 
 ---
 
