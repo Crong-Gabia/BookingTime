@@ -3,10 +3,51 @@ import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme, alpha } from '@mui/material/styles';
+
+const DEFAULT_SHADOWS = [
+  'none',
+  '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+  '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
+  '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
+  '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+  '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+  '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+];
+
+const shadows = Array.from({ length: 25 }, (_, index) => DEFAULT_SHADOWS[index] ?? DEFAULT_SHADOWS[DEFAULT_SHADOWS.length - 1]) as [
+  'none',
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+];
+
 import CssBaseline from '@mui/material/CssBaseline';
 import { SnackbarProvider } from 'notistack';
 import App from './App';
 import './index.css';
+
+export { shadows };
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,7 +58,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const theme = createTheme({
+export const theme = createTheme({
   palette: {
     primary: {
       main: '#2563EB',
@@ -139,33 +180,7 @@ const theme = createTheme({
     borderRadius: 8,
   },
   spacing: 8,
-  shadows: [
-    'none',
-    '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
-    '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-    '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
-    '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-    '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-    '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
-    '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-    '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
-    '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-    '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-    '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
-    '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-    '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
-    '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-    '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-    '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
-    '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-    '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
-    '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-    '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-  ] as const,
+  shadows,
   components: {
     MuiButton: {
       styleOverrides: {

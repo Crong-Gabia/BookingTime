@@ -572,18 +572,18 @@ export default function OrganizerSlotSelectionPage() {
         </Grid>
       </Container>
 
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            p: 2,
-            backgroundColor: 'background.paper',
-            boxShadow: 2,
-            zIndex: 1000,
-          }}
-        >
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          p: 2,
+          backgroundColor: 'background.paper',
+          boxShadow: 2,
+          zIndex: 1000,
+        }}
+      >
         <Container maxWidth="xl">
           <Button
             variant="contained"
