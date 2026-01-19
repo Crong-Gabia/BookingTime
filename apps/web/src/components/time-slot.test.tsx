@@ -1,9 +1,34 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import TimeSlot from './time-slot';
-import { theme } from '../main';
+
+const theme = createTheme({
+  palette: {
+    success: {
+      main: '#0D9488',
+      light: '#2DD4BF',
+      dark: '#0F766E',
+    },
+    error: {
+      main: '#E11D48',
+      light: '#FB7185',
+      dark: '#BE123C',
+    },
+    action: {
+      disabledBackground: 'rgba(0, 0, 0, 0.04)',
+    },
+    text: {
+      primary: '#0F172A',
+      disabled: '#94A3B8',
+    },
+    background: {
+      paper: '#FFFFFF',
+    },
+    divider: '#E2E8F0',
+  },
+});
 
 const renderWithTheme = (ui: React.ReactElement) => {
   return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
