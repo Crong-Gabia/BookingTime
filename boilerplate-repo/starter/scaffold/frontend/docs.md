@@ -1,0 +1,1 @@
+docs/, .claude/, work-history/ 디렉터리를 보일러플레이트 루트에서 복사해 사용합니다.

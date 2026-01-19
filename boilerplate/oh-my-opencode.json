@@ -1,0 +1,53 @@
+{
+  "agents": {
+    "orchestrator": {
+      "role": "orchestrator",
+      "writePaths": ["**/*"],
+      "allowedTools": ["*"]
+    },
+    "architecture-review": {
+      "role": "advisor",
+      "writePaths": [],
+      "allowedTools": ["read", "grep", "glob"]
+    },
+    "external-research": {
+      "role": "research",
+      "writePaths": [],
+      "allowedTools": ["webfetch", "gh", "grep", "glob"]
+    },
+    "codebase-explore": {
+      "role": "search",
+      "writePaths": [],
+      "allowedTools": ["grep", "glob", "ast_grep_search"]
+    },
+    "frontend-ui": {
+      "role": "ui",
+      "writePaths": ["src/ui/**", "src/components/**", "frontend/**", "web/**"],
+      "allowedTools": ["read", "edit", "write", "grep", "glob"]
+    },
+    "backend": {
+      "role": "backend",
+      "writePaths": ["src/api/**", "backend/**", "server/**"],
+      "allowedTools": ["read", "edit", "write", "grep", "glob"]
+    },
+    "documentation": {
+      "role": "docs",
+      "writePaths": ["docs/**"],
+      "allowedTools": ["read", "edit", "write", "grep", "glob"]
+    },
+    "multimodal": {
+      "role": "vision",
+      "writePaths": [],
+      "allowedTools": ["look_at"]
+    }
+  },
+  "delegation": {
+    "ui": "frontend-ui",
+    "backend": "backend",
+    "docs": "documentation",
+    "research": "external-research",
+    "search": "codebase-explore",
+    "architecture": "architecture-review",
+    "vision": "multimodal"
+  }
+}
