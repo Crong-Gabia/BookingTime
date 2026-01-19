@@ -25,6 +25,12 @@
 - `docs/conventions/typescript-style.md`
 - `docs/conventions/db-naming.md`
 - `docs/guidelines/workflow.md`
+- `work-history/context/current.md`
+
+### CONTEXT LOGGING (항상)
+- 작업 시작/재개 시: `work-history/context/current.md` 업데이트
+- 의사결정 발생 시: `work-history/context/decision-log.md`에 기록
+- 막힘(Blocked) 발생 시: `work-history/context/blocked.md` 템플릿으로 기록
 
 ### WHEN YOU TOUCH UI
 - `docs/guidelines/ui-common-guidelines.md`
