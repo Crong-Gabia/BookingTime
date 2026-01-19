@@ -14,6 +14,7 @@ import {
   Select,
   MenuItem,
   CircularProgress,
+  useTheme,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { generateTimeSlots, isBlockedSlot } from '../utils/timeSlot';
@@ -22,6 +23,7 @@ export default function ResponsePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const theme = useTheme();
   const [name, setName] = useState('');
   const [slotSelections, setSlotSelections] = useState<Record<string, 'available' | 'unavailable' | undefined>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -243,7 +245,7 @@ const effectiveName = name || defaultParticipant?.name || '';
           </Toolbar>
         </AppBar>
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-          <Typography variant="h4" sx={{ color: '#4caf50', marginBottom: '1rem' }}>
+          <Typography variant="h4" sx={{ color: theme.palette.success.main, marginBottom: '1rem' }}>
             ✅ 응답 완료!
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -335,9 +337,10 @@ const effectiveName = name || defaultParticipant?.name || '';
             style={{
               width: '100%',
               padding: '0.75rem',
-              border: '1px solid #ddd',
+              border: `1px solid ${theme.palette.divider}`,
               borderRadius: '4px',
               fontSize: '1rem',
+              backgroundColor: isSubmitting ? theme.palette.action.disabledBackground : 'transparent',
             }}
           />
         </Box>
@@ -399,21 +402,27 @@ const effectiveName = name || defaultParticipant?.name || '';
                     sx={{
                       padding: '0.75rem',
                       border: isAvailable
-                        ? '3px solid #4caf50'
+                        ? `3px solid ${theme.palette.success.main}`
                         : isUnavailable
-                          ? '3px solid #f44336'
+                          ? `3px solid ${theme.palette.error.main}`
                           : isOrganizerBlocked
-                            ? '2px dashed #ff9800'
-                            : '2px solid #e0e0e0',
+                            ? `2px dashed ${theme.palette.warning.main}`
+                            : `2px solid ${theme.palette.divider}`,
                       borderRadius: '8px',
                       backgroundColor: isAvailable
-                        ? '#e8f5e9'
+                        ? theme.palette.success.light
                         : isUnavailable
-                          ? '#ffebee'
+                          ? theme.palette.error.light
                           : isOrganizerBlocked
-                            ? '#fff3e0'
-                            : 'white',
-                      color: isAvailable ? '#2e7d32' : isUnavailable ? '#c62828' : isOrganizerBlocked ? '#e65100' : '#333',
+                            ? theme.palette.warning.light
+                            : theme.palette.background.paper,
+                      color: isAvailable
+                        ? theme.palette.success.dark
+                        : isUnavailable
+                          ? theme.palette.error.dark
+                          : isOrganizerBlocked
+                            ? theme.palette.warning.dark
+                            : theme.palette.text.primary,
                       fontWeight: 'bold',
                       opacity: isHolidayBlocked ? 0.4 : isOrganizerBlocked ? 0.6 : 1,
                       fontSize: '0.875rem',
@@ -435,8 +444,8 @@ const effectiveName = name || defaultParticipant?.name || '';
             left: 0,
             right: 0,
             padding: '1rem',
-            backgroundColor: 'white',
-            boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+            backgroundColor: 'background.paper',
+            boxShadow: 2,
             textAlign: 'center',
           }}
         >

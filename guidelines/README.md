@@ -35,6 +35,9 @@
 - 추가 입력 필요 시 GitHub 이슈 멘션으로 알림
 - PR 자동 검증 + AI 리뷰 사용법
 
+### 8. UI 공통 가이드라인 ([08-ui-common-guidelines.md](./08-ui-common-guidelines.md))
+- 전 화면 공통 디자인 원칙/토큰/컴포넌트/상태/접근성 규칙
+
 ---
 
 ## 사용법

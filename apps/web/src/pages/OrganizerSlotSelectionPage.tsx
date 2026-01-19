@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { generateTimeSlots, formatDateDisplay } from '../utils/timeSlot';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useToast } from '@/hooks/useToast';
+import { alpha } from '@mui/material/styles';
 import {
   AppBar,
   Toolbar,
@@ -248,7 +249,7 @@ export default function OrganizerSlotSelectionPage() {
   const selectedDateSlots = selectedDate ? timeSlotData.find((ds) => ds.date === selectedDate) : null;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'background.default' }}>
       <AppBar position="static" color="default" elevation={0}>
         <Toolbar>
           <IconButton onClick={() => navigate('/new')} color="inherit">
@@ -277,7 +278,7 @@ export default function OrganizerSlotSelectionPage() {
                 height: 'fit-content',
                 position: 'sticky',
                 top: 80,
-                backgroundColor: 'white',
+                backgroundColor: 'background.paper',
                 border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 2,
@@ -350,11 +351,11 @@ export default function OrganizerSlotSelectionPage() {
 
               <Box
                 sx={{
-                  backgroundColor: 'primary.50',
+                  backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.08),
                   borderRadius: 1.5,
                   p: 2,
                   border: '1px solid',
-                  borderColor: 'primary.100',
+                  borderColor: (theme) => alpha(theme.palette.primary.main, 0.2),
                 }}
               >
                 <Typography variant="body2" color="primary.dark" fontWeight={600}>
@@ -369,7 +370,7 @@ export default function OrganizerSlotSelectionPage() {
               elevation={0}
               sx={{
                 p: 2.5,
-                backgroundColor: 'white',
+                backgroundColor: 'background.paper',
                 border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 2,
@@ -434,8 +435,8 @@ export default function OrganizerSlotSelectionPage() {
                               fontSize: '0.625rem',
                               fontWeight: 700,
                               backgroundColor: 'success.main',
-                              color: 'white',
-                              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                              color: 'primary.contrastText',
+                              boxShadow: 4,
                               '& .MuiChip-label': { px: 0.5 },
                             }}
                           />
@@ -453,7 +454,7 @@ export default function OrganizerSlotSelectionPage() {
               elevation={0}
               sx={{
                 p: 2.5,
-                backgroundColor: 'white',
+                backgroundColor: 'background.paper',
                 border: '1px solid',
                 borderColor: 'divider',
                 borderRadius: 2,
@@ -528,16 +529,16 @@ export default function OrganizerSlotSelectionPage() {
                             fontWeight: 600,
                             border: '2px solid',
                             borderColor: isSelected ? 'success.main' : 'divider',
-                            backgroundColor: isSelected ? 'success.main' : 'white',
-                            color: isSelected ? 'white' : 'text.primary',
+                            backgroundColor: isSelected ? 'success.main' : 'background.paper',
+                            color: isSelected ? 'success.contrastText' : 'text.primary',
                             opacity: isBlocked ? 0.3 : 1,
                             transition: 'all 0.2s ease',
                             borderRadius: 1.5,
                             '&:hover': {
                               transform: isBlocked ? 'none' : 'translateY(-1px)',
                               backgroundColor: isBlocked ? undefined : isSelected ? 'success.dark' : 'grey.50',
-                              boxShadow: isBlocked ? 'none' : '0 2px 8px rgba(0,0,0,0.1)',
-                              color: isBlocked ? undefined : isSelected ? 'white' : 'text.primary',
+                              boxShadow: isBlocked ? 'none' : 3,
+                              color: isBlocked ? undefined : isSelected ? 'success.contrastText' : 'text.primary',
                               borderColor: isBlocked ? undefined : isSelected ? 'success.dark' : 'primary.main',
                             },
                           }}
@@ -571,18 +572,18 @@ export default function OrganizerSlotSelectionPage() {
         </Grid>
       </Container>
 
-      <Box
-        sx={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          p: 2,
-          backgroundColor: 'white',
-          boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
-          zIndex: 1000,
-        }}
-      >
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            p: 2,
+            backgroundColor: 'background.paper',
+            boxShadow: 2,
+            zIndex: 1000,
+          }}
+        >
         <Container maxWidth="xl">
           <Button
             variant="contained"
