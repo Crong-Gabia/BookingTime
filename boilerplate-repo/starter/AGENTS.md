@@ -43,7 +43,45 @@
 
 ---
 
-## 2. 역할 기반 카탈로그 (에이전트/모델 무관)
+## 2. 역할 기반 MUST READ 매핑
+
+> 비용(컨텍스트) 절감을 위해, 역할별로 "항상 읽어야 하는 문서"를 고정합니다.
+> 추가로 필요한 문서는 1) 상단 MUST/WHEN 섹션 또는 2) 작업 범위(기능 명세서)에 따라 선택합니다.
+
+### Orchestrator (조정자)
+- MUST: `docs/guidelines/README.md`, `docs/guidelines/workflow.md`, `work-history/context/current.md`
+- SHOULD: `work-history/product-spec/plan.md`, `work-history/product-spec/decisions.md`
+
+### Architecture/Review (설계/리뷰)
+- MUST: `docs/conventions/typescript-style.md`, `docs/conventions/db-naming.md`
+- SHOULD: `work-history/product-spec/plan.md`, `work-history/product-spec/decisions.md`
+
+### External Research (외부 레퍼런스)
+- MUST: `work-history/product-spec/plan.md`
+- SHOULD: 해당 영역 컨벤션(예: `docs/conventions/db-naming.md`)
+
+### Codebase Exploration (내부 탐색)
+- MUST: `work-history/context/current.md`, `docs/conventions/typescript-style.md`
+
+### Frontend UI/UX (UI)
+- MUST: `docs/guidelines/ui-common-guidelines.md`
+- SHOULD: `docs/guidelines/layout-patterns.md`, `docs/guidelines/status-colors.md`, `docs/guidelines/ui-components.md`
+
+### Backend (서버/API/DB)
+- MUST: `docs/conventions/db-naming.md`, `docs/conventions/typescript-style.md`
+- SHOULD: `docs/conventions/backend-structure.md`
+
+### Documentation (문서)
+- MUST: `work-history/context/current.md`
+- SHOULD: `docs/guidelines/workflow.md`
+
+### Multimodal Analysis (이미지/PDF)
+- MUST: `work-history/context/current.md`
+- SHOULD: `work-history/product-spec/features/_template.md`
+
+---
+
+## 3. 역할 기반 카탈로그 (에이전트/모델 무관)
 
 ### Orchestrator
 - 작업 분해/할당/취합, 최종 결정
@@ -72,14 +110,14 @@
 
 ---
 
-## 3. 병렬 실행 규약
+## 4. 병렬 실행 규약
 
 - **제안 → 확정 → 반영** 단계 분리
 - 파일 소유권 충돌 시 오케스트레이터가 우선권 조정
 
 ---
 
-## 4. 보고 포맷 (강제)
+## 5. 보고 포맷 (강제)
 
 ```
 Status: proposed | in_progress | blocked | ready_for_review
@@ -92,7 +130,7 @@ Questions:
 
 ---
 
-## 5. 전역 컨벤션 요약
+## 6. 전역 컨벤션 요약
 
 - 코드 컨벤션 상세: docs/conventions/code-style.md
 - DB 네이밍 상세: docs/conventions/db-naming.md
