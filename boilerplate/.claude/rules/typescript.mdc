@@ -1,0 +1,8 @@
+---
+globs: ["**/*.ts", "**/*.tsx"]
+description: "TypeScript rules"
+---
+- Type errors suppression 금지 (`as any`, `@ts-ignore`, `@ts-expect-error`)
+- Naming: 변수/함수 camelCase, 타입/클래스 PascalCase
+- Imports: 외부 → 내부 → 상대경로 순
+- 테스트 파일 규칙은 tests.mdc를 따른다

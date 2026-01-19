@@ -1,0 +1,8 @@
+---
+globs: ["**/migrations/**/*.sql", "**/*migration*.*", "**/schema.prisma"]
+description: "DB naming rules for migrations/schema"
+---
+- 테이블/컬럼은 snake_case
+- PK는 id, FK는 {entity}_id
+- created_at/updated_at 필수 여부를 확인
+- 컬럼명에 단위 포함 규칙 준수 (amount_krw, size_bytes 등)
