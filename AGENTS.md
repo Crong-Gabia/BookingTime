@@ -39,5 +39,22 @@ RECOMMENDATION: 추천안
 - PR 확인: `gh pr view <id> --comments` / `gh pr diff <id>`
 - PR 머지: `gh pr merge <id> --merge` (필요시 `--squash`)
 
+---
+
+## 문서 읽기 정책 (속도 우선)
+
+문서가 많아도 매번 전부 읽지 않도록, **읽기 비용을 최소화**합니다.
+
+### MUST (세션 시작/재개 시)
+- `work-history/context/current.md` (SSOT: 지금 무엇을 하는지/blocked/결정)
+
+### WHEN (해당 작업을 할 때만)
+- 코드 변경 시: `docs/conventions/typescript-style.md`
+- DB/Prisma 스키마/마이그레이션 변경 시: `docs/conventions/db-naming.md`
+- UI/UX(스타일/레이아웃) 변경 시: `guidelines/README.md` + 관련 가이드(예: `guidelines/08-ui-common-guidelines.md`)
+- 테스트 작성/수정 시: `docs/guides/06-testing.md` 또는 `apps/*`의 테스트 컨벤션
+
+> 원칙: MUST는 3개 이하로 유지하고, 나머지는 작업 범위에 따라 선택적으로 읽습니다.
+
 ## 주의
 - 개인/프로덕션 시크릿이 포함된 `.env` 파일 내용은 이슈/PR/코멘트에 절대 붙이지 않는다.

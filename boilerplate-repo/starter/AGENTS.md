@@ -21,11 +21,9 @@
 - 훅(Pre/Post/Stop)은 자동화만 수행하고, 정책은 문서로 분리한다.
 
 ### MUST READ (세션 시작 시)
-- `docs/guidelines/README.md`
-- `docs/conventions/typescript-style.md`
-- `docs/conventions/db-naming.md`
-- `docs/guidelines/workflow.md`
 - `work-history/context/current.md`
+
+> 원칙: MUST는 3개 이하로 유지합니다. 나머지는 아래 WHEN 또는 역할/작업 범위에 따라 선택적으로 읽습니다.
 
 ### CONTEXT LOGGING (항상)
 - 작업 시작/재개 시: `work-history/context/current.md` 업데이트
@@ -49,35 +47,43 @@
 > 추가로 필요한 문서는 1) 상단 MUST/WHEN 섹션 또는 2) 작업 범위(기능 명세서)에 따라 선택합니다.
 
 ### Orchestrator (조정자)
-- MUST: `docs/guidelines/README.md`, `docs/guidelines/workflow.md`, `work-history/context/current.md`
-- SHOULD: `work-history/product-spec/plan.md`, `work-history/product-spec/decisions.md`
+- MUST: `work-history/context/current.md`
+- SHOULD: `docs/guidelines/workflow.md`
+- REFERENCE: `docs/guidelines/README.md`, `work-history/product-spec/plan.md`, `work-history/product-spec/decisions.md`
 
 ### Architecture/Review (설계/리뷰)
-- MUST: `docs/conventions/typescript-style.md`, `docs/conventions/db-naming.md`
-- SHOULD: `work-history/product-spec/plan.md`, `work-history/product-spec/decisions.md`
+- MUST: `work-history/context/current.md`
+- SHOULD: `docs/conventions/typescript-style.md`
+- REFERENCE: `docs/conventions/db-naming.md`, `work-history/product-spec/plan.md`, `work-history/product-spec/decisions.md`
 
 ### External Research (외부 레퍼런스)
-- MUST: `work-history/product-spec/plan.md`
-- SHOULD: 해당 영역 컨벤션(예: `docs/conventions/db-naming.md`)
+- MUST: `work-history/context/current.md`
+- SHOULD: `work-history/product-spec/plan.md`
+- REFERENCE: 해당 영역 컨벤션(예: `docs/conventions/db-naming.md`)
 
 ### Codebase Exploration (내부 탐색)
-- MUST: `work-history/context/current.md`, `docs/conventions/typescript-style.md`
+- MUST: `work-history/context/current.md`
+- SHOULD: `docs/conventions/typescript-style.md`
 
 ### Frontend UI/UX (UI)
-- MUST: `docs/guidelines/ui-common-guidelines.md`
-- SHOULD: `docs/guidelines/layout-patterns.md`, `docs/guidelines/status-colors.md`, `docs/guidelines/ui-components.md`
+- MUST: `work-history/context/current.md`
+- SHOULD: `docs/guidelines/ui-common-guidelines.md`
+- REFERENCE: `docs/guidelines/layout-patterns.md`, `docs/guidelines/status-colors.md`, `docs/guidelines/ui-components.md`
 
 ### Backend (서버/API/DB)
-- MUST: `docs/conventions/db-naming.md`, `docs/conventions/typescript-style.md`
-- SHOULD: `docs/conventions/backend-structure.md`
+- MUST: `work-history/context/current.md`
+- SHOULD: `docs/conventions/typescript-style.md`
+- REFERENCE: `docs/conventions/db-naming.md`, `docs/conventions/backend-structure.md`
 
 ### Documentation (문서)
 - MUST: `work-history/context/current.md`
 - SHOULD: `docs/guidelines/workflow.md`
+- REFERENCE: `docs/guidelines/README.md`
 
 ### Multimodal Analysis (이미지/PDF)
 - MUST: `work-history/context/current.md`
 - SHOULD: `work-history/product-spec/features/_template.md`
+- REFERENCE: `work-history/product-spec/features/index.md`
 
 ---
 
