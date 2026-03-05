@@ -1,0 +1,33 @@
+{
+  "$schema": "https://onesaas.kr/schema/onesaas.json",
+  "schemaVersion": "1.0.0",
+  "project": {
+    "id": "bookingtime",
+    "name": "bookingtime",
+    "slug": "bookingtime",
+    "company": "되는 시간",
+    "email": "support@bookingtime.com",
+    "createdAt": "2026-03-05T08:26:45.409Z"
+  },
+  "template": {
+    "id": "basic",
+    "version": "1.0.0"
+  },
+  "theme": {
+    "id": "startup"
+  },
+  "features": {
+    "auth": {
+      "providers": [
+        "email"
+      ]
+    },
+    "payment": {
+      "enabled": false,
+      "provider": "none"
+    },
+    "vercel": {
+      "options": []
+    }
+  }
+}
